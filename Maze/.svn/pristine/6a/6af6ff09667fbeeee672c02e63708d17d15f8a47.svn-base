@@ -1,0 +1,667 @@
+package falstad;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+import falstad.Robot.Turn;
+import falstad.Robot.Direction;
+
+public class CuriousMouse extends WallFollower implements RobotDriver {
+	
+	HashMap<Integer, Integer> known; //hashmap with unique cell integer as key and # of visits as value
+	int[][] cellArray;
+	ArrayList<Direction> dirList; 
+	int[] EAST = {1, 0};
+	int[] WEST = {-1, 0};
+	int[] SOUTH = {0,-1};
+	int[] NORTH = {0, 1};
+	SingleRandom random;
+	Direction prevMove;
+	int[] prevCell;
+	
+	public CuriousMouse() {
+		super();
+		known = new HashMap<Integer, Integer>();
+		
+		dirList = new ArrayList<Direction>();
+		dirList.add(Direction.BACKWARD);
+		dirList.add(Direction.FORWARD);
+		dirList.add(Direction.LEFT);
+		dirList.add(Direction.RIGHT);
+		random = SingleRandom.getRandom();
+		
+	}
+	
+	@Override
+	public void setDimensions(int width, int height) {
+		this.width = width;
+		this.height = height;
+		this.cellArray = new int[this.height][this.width];
+		populateCellArray();
+	}
+	
+	private void populateCellArray(){
+		int num = 0;
+		// (i,j) = row, column
+		//width is number of colums, height is number of rows
+		for(int i = 0; i < height; i++){
+			for(int j = 0; j < width; j++){
+				this.cellArray[i][j] = num;
+				num++;
+			}
+		}
+	}
+	
+	/**
+	 * cycles through all possible directions and gets ones that are available to move to
+	 * @return a list of directions that are possible moves
+	 */
+	private ArrayList<Direction> checkOptions(){
+		ArrayList<Direction> possDirs = new ArrayList<Direction>();
+		for(int i = 0; i < 4; i++){
+			int dist = robot.distanceToObstacle(dirList.get(i));
+			if(dist != 0){
+				possDirs.add(dirList.get(i));
+			}
+		}
+		return possDirs;
+	}
+	
+	/**
+	 * checks the moves to assess whether mouse has already visited cell. If the cell is not known, then it is twice as likely to be picked
+	 * @return a weighted list of directions to randomly choose
+	 * @throws Exception 
+	 */
+	private ArrayList<Direction> checkKnown(ArrayList<Direction> possMoves) throws Exception{
+		ArrayList<Direction> movesToChoose = new ArrayList<Direction>();
+		int[] curDir = this.robot.getCurrentDirection();
+		
+		//current position janx to base directions off of
+		int x = this.robot.getCurrentPosition()[0];
+		int y = this.robot.getCurrentPosition()[1];
+		int refCell = cellArray[x][y];
+		
+		
+		if(this.arrayEquals(curDir, EAST)){
+			int forwardVal = 0;
+			int leftVal = 0;
+			int backwardVal = 0;
+			int rightVal = 0;
+			int eastCell;
+			ArrayList<Integer> numVisits = new ArrayList<Integer>(); //number of times cell has been visited
+			//ArrayList<Direction> directionOfCell = new ArrayList<Direction>(); //corresponding direction for number of times cell has been visited, should have SAME INDEX
+			HashMap<Integer, Direction> lookUp = new HashMap<Integer, Direction>();
+			for(int i = 0; i < possMoves.size(); i++){
+				//The move that will be added to choose array
+				Direction move = possMoves.get(i);
+				
+				//check all the possible move that it could be and check if that cell is already known.
+				if(move == Direction.FORWARD){
+					eastCell = cellArray[x+1][y];
+					if(known.containsKey(eastCell)){
+						//movesToChoose.add(move);
+						forwardVal = known.get(eastCell);
+						//lookUp.put(forwardVal, move);
+						
+						numVisited.add(forwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.LEFT){
+					int cell = cellArray[x][y+1];
+					if(known.containsKey(cell)){
+						//movesToChoose.add(move);
+						leftVal = known.get(cell);
+						//lookUp.put(leftVal, move);
+						numVisited.add(leftVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.BACKWARD){
+					int cell = cellArray[x - 1][y];
+					if(known.containsKey(cell)){
+						//movesToChoose.add(move);
+						backwardVal = known.get(cell);
+						//lookUp.put(backwardVal, move);
+						numVisited.add(backwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if( move == Direction.RIGHT){
+					int cell = cellArray[x][y - 1];
+					if(known.containsKey(cell)){
+						//movesToChoose.add(move);
+						rightVal = known.get(cell);
+						//lookUp.put(rightVal, move);
+						numVisited.add(rightVal);
+						
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				}
+			}
+			//iterate over val array and get lowest val and add that direction in to moves to choose
+			
+			if(numVisited.size() > 0){
+				Collections.sort(numVisited);
+				//get the one visited the least amount of times, should be first value of numVisited
+				if(numVisited.get(0) == forwardVal && this.prevMove != Direction.BACKWARD){
+					movesToChoose.add(Direction.FORWARD);
+				}else if(numVisited.get(0) == leftVal && this.prevMove != Direction.LEFT){
+					movesToChoose.add(Direction.LEFT);
+				}else if(numVisited.get(0) == backwardVal && this.prevMove != Direction.BACKWARD){
+					movesToChoose.add(Direction.BACKWARD);
+				}else if(numVisited.get(0) == rightVal && this.prevMove != Direction.RIGHT){
+					movesToChoose.add(Direction.RIGHT);
+				}
+				//Direction dirToAdd = lookUp.get(numVisited.get(0));
+				//movesToChoose.add(dirToAdd);
+			}
+			
+			return movesToChoose;
+		} else if(this.arrayEquals(curDir, NORTH)){
+			int forwardVal;
+			int leftVal;
+			int backwardVal;
+			int rightVal;
+			
+			ArrayList<Integer> numVisited = new ArrayList<Integer>();
+			HashMap<Integer, Direction> lookUp = new HashMap<Integer, Direction>();
+			for(int i = 0; i < possMoves.size(); i++){
+				//The move that will be added to choose array
+				Direction move = possMoves.get(i);
+				
+				//check all the possible move that it could be and check if that cell is already known.
+				if(move == Direction.FORWARD){
+					int cell = cellArray[x][y + 1];
+					if(known.containsKey(cell)){
+						forwardVal = known.get(cell);
+						lookUp.put(forwardVal, move);
+						numVisited.add(forwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.LEFT){
+					int cell = cellArray[x - 1][y];
+					if(known.containsKey(cell)){
+						leftVal = known.get(cell);
+						lookUp.put(leftVal, move);
+						numVisited.add(leftVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.BACKWARD){
+					int cell = cellArray[x][y - 1];
+					if(known.containsKey(cell)){
+						backwardVal = known.get(cell);
+						lookUp.put(backwardVal, move);
+						numVisited.add(backwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if( move == Direction.RIGHT){
+					int cell = cellArray[x + 1][y];
+					if(known.containsKey(cell)){
+						rightVal = known.get(cell);
+						lookUp.put(rightVal, move);
+						numVisited.add(rightVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				}
+			}
+			
+			//get lowest val and add that direction in to moves to choose
+			if(numVisited.size() > 0){
+				Collections.sort(numVisited);
+				//get the one visited the least amount of times, should be first value of numVisited
+				Direction dirToAdd = lookUp.get(numVisited.get(0));
+				movesToChoose.add(dirToAdd);
+			}
+			
+			return movesToChoose;
+		} else if(this.arrayEquals(curDir, WEST)){
+			int forwardVal;
+			int leftVal;
+			int backwardVal;
+			int rightVal;
+			
+			ArrayList<Integer> numVisited = new ArrayList<Integer>();
+			HashMap<Integer, Direction> lookUp = new HashMap<Integer, Direction>();
+			for(int i = 0; i < possMoves.size(); i++){
+				//The move that will be added to choose array
+				Direction move = possMoves.get(i);
+				
+				//check all the possible move that it could be and check if that cell is already known.
+				if(move == Direction.FORWARD){
+					int cell = cellArray[x - 1][y];
+					if(known.containsKey(cell)){
+						forwardVal = known.get(cell);
+						lookUp.put(forwardVal, move);
+						numVisited.add(forwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.LEFT){
+					int cell = cellArray[x][y - 1];
+					if(known.containsKey(cell)){
+						leftVal = known.get(cell);
+						lookUp.put(leftVal, move);
+						numVisited.add(leftVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.BACKWARD){
+					int cell = cellArray[x + 1][y];
+					if(known.containsKey(cell)){
+						backwardVal = known.get(cell);
+						lookUp.put(backwardVal, move);
+						numVisited.add(backwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if( move == Direction.RIGHT){
+					int cell = cellArray[x][y + 1];
+					if(known.containsKey(cell)){
+						rightVal = known.get(cell);
+						lookUp.put(rightVal, move);
+						numVisited.add(rightVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				}
+			}
+			//get lowest val and add that direction in to moves to choose
+			if(numVisited.size() > 0){
+				Collections.sort(numVisited);
+				//get the one visited the least amount of times, should be first value of numVisited
+				Direction dirToAdd = lookUp.get(numVisited.get(0));
+				movesToChoose.add(dirToAdd);
+			}
+			
+			return movesToChoose;
+		} else if(this.arrayEquals(curDir, SOUTH)){
+			int forwardVal;
+			int leftVal;
+			int backwardVal;
+			int rightVal;
+			
+			ArrayList<Integer> numVisited = new ArrayList<Integer>();
+			HashMap<Integer, Direction> lookUp = new HashMap<Integer, Direction>();
+			for(int i = 0; i < possMoves.size(); i++){
+				//The move that will be added to choose array
+				Direction move = possMoves.get(i);
+				
+				//check all the possible move that it could be and check if that cell is already known.
+				if(move == Direction.FORWARD){
+					int cell = cellArray[x][y - 1];
+					if(known.containsKey(cell)){
+						forwardVal = known.get(cell);
+						lookUp.put(forwardVal, move);
+						numVisited.add(forwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.LEFT){
+					int cell = cellArray[x + 1][y];
+					if(known.containsKey(cell)){
+						leftVal = known.get(cell);
+						lookUp.put(leftVal, move);
+						numVisited.add(leftVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if(move == Direction.BACKWARD){
+					int cell = cellArray[x][y + 1];
+					if(known.containsKey(cell)){
+						backwardVal = known.get(cell);
+						lookUp.put(backwardVal, move);
+						numVisited.add(backwardVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				} else if( move == Direction.RIGHT){
+					int cell = cellArray[x - 1][y];
+					if(known.containsKey(cell)){
+						rightVal = known.get(cell);
+						lookUp.put(rightVal, move);
+						numVisited.add(rightVal);
+					} else{
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+						movesToChoose.add(move);
+					}
+				}
+			}
+			
+			//get lowest val and add that direction in to moves to choose
+			if(numVisited.size() > 0){
+				Collections.sort(numVisited);
+				//get the one visited the least amount of times, should be first value of numVisited
+				
+				Direction dirToAdd = lookUp.get(numVisited.get(0));
+				movesToChoose.add(dirToAdd);
+			}
+			
+			return movesToChoose;
+		}
+		return null;
+	}
+	
+	private void randMove(Direction theMove) throws Exception{
+		
+		if(theMove == Direction.FORWARD){
+			robot.move(1);
+			this.numSteps++;
+			return;
+		} else if(theMove == Direction.BACKWARD){
+			robot.rotate(Turn.AROUND);
+			robot.move(1);
+			this.numSteps++;
+			return;
+		} else if(theMove == Direction.LEFT){
+			robot.rotate(Turn.LEFT);
+			robot.move(1);
+			this.numSteps++;
+			return;
+		} else if(theMove == Direction.RIGHT){
+			robot.rotate(Turn.RIGHT);
+			robot.move(1);
+			this.numSteps++;
+			return;
+		}
+	}
+	
+	@Override
+	public boolean drive2Exit() throws Exception {
+		
+		known.put(0, 1);
+		while(! this.robot.isAtGoal()){
+			
+			boolean inRoom = this.robot.isInsideRoom();
+			if(inRoom){
+				//exploreRoom();
+				mouseFollowWall();
+				
+			}
+
+		
+			//1. check options
+			ArrayList<Direction> possMoves = this.checkOptions();
+			
+			//2. check known cells
+			ArrayList<Direction> movesToChoose = this.checkKnown(possMoves);
+			
+			//3. choose a random direction out of those possible candidates
+			int randNdx = random.nextIntWithinInterval(0, (movesToChoose.size() - 1) );
+			
+			//4. execute the randomly chosen direction
+			Direction theMove = movesToChoose.get(randNdx);
+			
+			prevCell = this.robot.getCurrentPosition();
+			//need to move in that direction, based off of absolute direction		
+			randMove(theMove);
+			
+			//keeps track of previous move
+			prevMove = theMove;
+			
+			int x = this.cellArray[this.robot.getCurrentPosition()[0]][this.robot.getCurrentPosition()[1]];
+			if(known.containsKey(x)){
+				int numTimesVisited = known.get(x); 
+				System.out.println("number of times visited: " + numTimesVisited + " at " + this.robot.getCurrentPosition()[0] + this.robot.getCurrentPosition()[1]);
+				numTimesVisited++;
+				known.put(x, numTimesVisited );
+			}else{
+				//
+				known.put(x, 1);
+			}
+			
+		}
+		
+		goThroughExit();
+		
+		return true;
+	}
+	
+	private boolean cornerCheck(){
+		if(robot.distanceToObstacle(Direction.LEFT) == 0 && robot.distanceToObstacle(Direction.FORWARD) == 0){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * goes through room and finds the exit that has been visited the least
+	 * @throws Exception 
+	 */
+	/*
+	private void exploreRoom() throws Exception{
+		
+		int[] startPosition = this.robot.getCurrentPosition();
+		
+		ArrayList<Integer> exitVals = new ArrayList<Integer>();
+		HashMap<Integer, int[]> exitLocations = new HashMap<Integer, int[]>(); //map to keep track of locations of exits, based on their known value
+		this.mouseFollowWall();
+		while(! arrayEquals(startPosition, robot.getCurrentPosition())){
+			int x = this.robot.getCurrentPosition()[0];
+			int y = this.robot.getCurrentPosition()[1];
+			//check number of times visited of cell to the left
+			int[] curDir = this.robot.getCurrentDirection();
+			int leftCell;
+			if(!cornerCheck()){
+				if(this.arrayEquals(curDir, EAST)){
+					leftCell = this.cellArray[x][y+1];
+					//number of times cell has been visited, if been visited before
+					if(known.containsKey(leftCell)){
+						int numVisits = known.get(leftCell);
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					} else{
+						int numVisits = 0;
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					}
+					
+				}else if(this.arrayEquals(curDir, NORTH)){
+					leftCell = this.cellArray[x-1][y];
+					//number of times cell has been visited
+					if(known.containsKey(leftCell)){
+						int numVisits = known.get(leftCell);
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					} else{
+						int numVisits = 0;
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					}
+				}else if(this.arrayEquals(curDir, WEST)){
+					leftCell = this.cellArray[x][y -1 ];
+					//number of times cell has been visited
+					if(known.containsKey(leftCell)){
+						int numVisits = known.get(leftCell);
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					} else{
+						int numVisits = 0;
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					}
+				}else if(this.arrayEquals(curDir, SOUTH)){
+					leftCell = this.cellArray[x+1][y];
+					//number of times cell has been visited
+					if(known.containsKey(leftCell)){
+						int numVisits = known.get(leftCell);
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					} else{
+						int numVisits = 0;
+						exitVals.add(numVisits);
+						exitLocations.put(numVisits, robot.getCurrentPosition());
+					}
+				}
+			}
+			
+			mouseFollowWall();
+		}
+		
+	}*/
+	
+	protected void orient() throws Exception{
+		int left = robot.distanceToObstacle(Direction.LEFT);
+		int forward = robot.distanceToObstacle(Direction.FORWARD);
+		//if left == 0 dont do anything. if forward == 0 turn left. if forward and left = 0, turn right
+		if(left == 0 && forward == 0){
+			robot.rotate(Turn.RIGHT);
+		} else if( forward == 0 && (left != 0)){
+			robot.rotate(Turn.LEFT);
+		} else if(forward != 0 && left != 0){
+			robot.rotate(Turn.LEFT);
+		}
+	}
+	
+	
+	private void mouseFollowWall() throws Exception{
+		
+		//orient();
+		
+		moveAlongWall();
+		//orient();
+		if(cornerCheck()){
+			moveAlongWall();
+		}
+		if( (robot.distanceToObstacle(Direction.LEFT) == 0) && robot.isInsideRoom()){
+			robot.move(1);
+		}
+		if( (robot.distanceToObstacle(Direction.FORWARD) != 0 || robot.distanceToObstacle(Direction.LEFT) != 0) && robot.isInsideRoom()){
+			robot.rotate(Turn.LEFT);
+			robot.move(1);
+		}
+	}
+	
+	private void moveAlongWall() throws Exception{
+		//get forward dist to obstacle.
+		orient();
+		int forwardDist = robot.distanceToObstacle(Direction.FORWARD);
+		int left = 0;
+		int x = 0;
+		while(left == 0 && x < forwardDist && robot.isInsideRoom()){
+			robot.move(1);
+			this.numSteps++;
+			x++;
+			left = robot.distanceToObstacle(Direction.LEFT);
+		}
+	}
+	/**
+	 * for use once the robot gets to the exit cell
+	 * @return the direction that the exit is
+	 */
+	protected void goThroughExit(){
+		int exitForward = robot.distanceToObstacle(Direction.FORWARD);
+		int exitLeft = robot.distanceToObstacle(Direction.LEFT);
+		int exitRight = robot.distanceToObstacle(Direction.RIGHT);
+		int exitBackwards = robot.distanceToObstacle(Direction.BACKWARD);
+		if(exitForward == Integer.MAX_VALUE){
+			try {
+				robot.move(1);
+				this.numSteps++;
+			} catch (Exception e) {
+				
+				e.printStackTrace();
+			}
+		} else if(exitLeft == Integer.MAX_VALUE){
+			try {
+				robot.rotate(Turn.LEFT);
+				robot.move(1);
+				this.numSteps++;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		} else if(exitRight == Integer.MAX_VALUE){
+			try {
+				robot.rotate(Turn.RIGHT);
+				robot.move(1);
+				this.numSteps++;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if(exitBackwards == Integer.MAX_VALUE){
+			try {
+				robot.rotate(Turn.AROUND);
+				robot.move(1);
+				this.numSteps++;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	/**
+	 * tests whether two arrays are equal
+	 * @param a1
+	 * @param a2
+	 * @return
+	 */
+	protected boolean arrayEquals(int[] a1, int[] a2){
+		if(a1.length != a2.length){
+			return false;
+		}
+		for(int i = 0; i < a1.length; i++){
+			if( a1[i] != a2[i]){
+				return false;
+			}
+		}
+		return true;
+	}
+
+
+}

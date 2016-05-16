@@ -1,0 +1,44 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import falstad.Robot.Turn;
+
+public class WallFollowerTest {
+	BasicRobot myRobot; //robot that is being tested
+	MazeApplication a;
+
+	@Before
+	public void setUp() throws Exception {
+		SingleRandom.setSeed(17);
+		myRobot = new BasicRobot();
+		a = new MazeApplication();
+		a.repaint();
+		//0 = 48, 1 = 49
+		a.maze.keyDown(50);
+		a.maze.mazebuilder.buildThread.join();
+		
+		myRobot.setMaze(a.maze);
+		a.maze.robot = myRobot;
+	}
+
+	@Test
+	public void testDrive2Exit() {
+		RobotDriver wallFollow = new WallFollower();
+		wallFollow.setRobot(myRobot);
+		wallFollow.setDimensions(a.maze.mazew, a.maze.mazeh);
+		try {
+			assertTrue(wallFollow.drive2Exit());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			assertTrue(myRobot.hasStopped());
+		}
+		System.out.println("energy consumed: " + wallFollow.getEnergyConsumption());
+		System.out.println("steps taken: " + wallFollow.getPathLength());
+	}
+
+}

@@ -1,0 +1,43 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+import edu.wm.cs.cs301.slidingpuzzle.PuzzleState.Operation;
+
+public class DFSSolver implements PuzzleSolver {
+
+	@Override
+	public boolean configure(int[] initial, int[] goal) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Operation[] movesToSolve() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState getSolverInitialState() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState getSolverFinalState() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumberOfStatesExplored() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getMaxSizeOfQueue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+}

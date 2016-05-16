@@ -1,0 +1,83 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+public class SimplePuzzleState implements PuzzleState {
+
+	@Override
+	public void setState(int[] gameState) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int[] getState() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState getParent() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setParent(PuzzleState parentState) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setOperation(Operation op) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Operation getOperation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setDistance(int distance) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int getDistance() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean equals(PuzzleState other) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public PuzzleState moveUp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveDown() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveLeft() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveRight() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

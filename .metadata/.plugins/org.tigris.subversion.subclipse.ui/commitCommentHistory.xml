@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CommitComments>	<CommitComment>I know the android apk file and jar.cache is corrupted somehow, if it cannot be run please email me</CommitComment>
+	<CommitComment>final commit before submission. changed the mazefile reader to an async task and fixed some things wrong with it</CommitComment>
+	<CommitComment>Still need to do javadoc comments, got some kinks worked out with the color crap and mazeFileReader.</CommitComment>
+	<CommitComment>I think i got the files to work :&apos;)</CommitComment>
+	<CommitComment>got pause button too work. also fixed some bug in wizard. started file stuff</CommitComment>
+	<CommitComment>binary test</CommitComment>
+	<CommitComment>animation works, with finish screens</CommitComment>
+	<CommitComment>ANIMATION (... for wizard) WORKS!!!!! AND IT SWITCHES TO THE FINISH SCREEN :&apos;)</CommitComment>
+	<CommitComment>have a sad attempt at getting animation to work</CommitComment>
+	<CommitComment>updated the finish screen so it displays the correct pathlength, battery and whether user won or lost</CommitComment>
+</CommitComments>

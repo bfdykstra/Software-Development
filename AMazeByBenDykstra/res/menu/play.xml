@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="edu.wm.cs.cs301.BenDykstra.ui.PlayActivity" >
+    
+    <!--  
+    <item
+        android:id="@+id/maze_switch"
+        android:title=""
+        app:showAsAction="ifRoom"
+        app:actionLayout="@layout/show_maze_layout"
+    />  --> 
+</menu>

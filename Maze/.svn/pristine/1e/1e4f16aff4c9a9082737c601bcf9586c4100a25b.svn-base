@@ -1,0 +1,26 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+public class MazeBuilderTest {
+
+	@Test
+	public void test() {
+		MazeBuilder m1 = new MazeBuilder(true);
+		m1.run();
+		m1.buildThread.start();
+		try {
+			m1.buildThread.wait(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();	
+		}
+		
+		if(! m1.buildThread.isAlive()){
+			//test all of methods
+		}
+		fail("Not yet implemented");
+	}
+
+}

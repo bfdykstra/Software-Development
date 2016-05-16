@@ -1,0 +1,81 @@
+package falstad;
+
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Panel;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+
+public class MazePanel extends Panel  {
+	/* Panel operates a double buffer see
+	 * http://www.codeproject.com/Articles/2136/Double-buffer-in-standard-Java-AWT
+	 * for details
+	 */
+	Image bufferImage ;
+	ActionListener al;
+	
+	public MazePanel() {
+		super() ;
+		this.setFocusable(false) ;
+	}
+	@Override
+	public void update(Graphics g) {
+		paint(g) ;
+	}
+	@Override
+	public void paint(Graphics g) {
+		g.drawImage(bufferImage,0,0,null) ;
+	}
+	/*
+	public void setBufferImage(Image buffer) {
+		bufferImage = buffer ;
+	}
+	*/
+	public void initBufferImage() {
+		bufferImage = createImage(Constants.VIEW_WIDTH, Constants.VIEW_HEIGHT);
+		if (null == bufferImage)
+		{
+			System.out.println("Error: creation of buffered image failed, presumedly container not displayable");
+		}
+		String[] generateStrings = {"DFS", "Prim", "Eller"};
+		String[] driverStrings = {"Manual", "WallFollower", "Mouse", "Wizard"};
+		String[] skillLevel = {"0","1","2","3","4","5","6","7","8","9"};
+		
+		JComboBox driverList = new JComboBox(driverStrings);
+		driverList.addActionListener(al); //al has not been initialized yet
+		
+		JComboBox generateList = new JComboBox(generateStrings);
+		generateList.addActionListener(al);
+		
+		JComboBox skillList = new JComboBox(skillLevel);
+		skillList.addActionListener(al);
+		
+		ArrayList<JComboBox> boxList = new ArrayList<JComboBox>();
+		boxList.add(driverList);
+		boxList.add(generateList);
+		boxList.add(skillList);
+		JPanel optionPanel = new JPanel();
+		optionPanel.setLayout(new GridLayout(1,3));
+		for(int i = 0; i < 3; i++){
+			JComboBox theBox = boxList.get(i);
+			optionPanel.add(theBox);
+		}
+		
+		//dont know where to put it now to display it
+	}
+	
+
+	public Graphics getBufferGraphics() {
+		if (null == bufferImage)
+			initBufferImage() ;
+		return bufferImage.getGraphics() ;
+	}
+	public void update() {
+		paint(getGraphics()) ;
+	}
+}

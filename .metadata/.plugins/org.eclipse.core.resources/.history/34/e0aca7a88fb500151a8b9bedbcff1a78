@@ -1,0 +1,35 @@
+
+
+public class repeatNumbers {
+	
+	public static int countArray(int[] array, int theNumber){
+		//Hashtable<Integer, Integer> table = new Hashtable<Integer, Integer>();
+		int count = 0;
+		for(int i = 0; i < array.length; i++){
+			
+			if( array[i] == theNumber){
+				count++;
+			}
+			/*
+			Integer val = table.get(array[i]); //get the number of times the integer has been seen before
+			//if the value is not yet in the table, will return null. 
+			if(val != null){
+				table.put(array[i], val++);
+			}else{
+				table.put(array[i], 1);
+			}*/
+		}
+		
+		return count;
+	}
+
+	public static void main(String[] args) {
+		int[] passArray = {1,2,3,4,3,5,9,1,1,2};
+		int theNumber = 1;
+		int numberOfTimes = countArray(passArray, theNumber); // should be equal to 3
+		System.out.print(numberOfTimes);
+		
+
+	}
+
+}

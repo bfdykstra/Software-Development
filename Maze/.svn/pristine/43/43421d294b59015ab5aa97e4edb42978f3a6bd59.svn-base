@@ -1,0 +1,52 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class MazeBuilderTest {
+
+	MazeStub mazeStub; //// reference to the mazeStub that is constructed, results are returned by calling mazeStub.newMaze(..)
+	Thread testThread;
+	
+	@Before
+	public void setUp(){
+		mazeStub = new MazeStub();
+		mazeStub.build(1); //this then calls Mazebuilder.build() which then calls init and initializes builder attributes
+		
+	}
+	
+	
+	
+	@Test
+	public void configTest() {
+		//MazeBuilder m1 = new MazeBuilder(true);
+		assertNotNull(mazeStub.mazebuilder.cells);
+		assertNotNull(mazeStub.mazebuilder.dists);
+		assertNotNull(mazeStub.mazebuilder.height);
+		assertNotNull(mazeStub.mazebuilder.width);
+		assertNotNull(mazeStub.mazebuilder.startx);
+		assertNotNull(mazeStub.mazebuilder.starty);
+		
+		//we now have an initialized MazeBuilder object that we can do things too
+		//m1.run();
+		
+		
+	}
+	
+	@Test
+	public void runTest(){
+		try {
+			mazeStub.mazebuilder.buildThread.join();
+			mazeStub.mazebuilder.runWithStub(); //calls newMaze method in MazeStub
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//mazeStub.mazedists.computeDistances(mazeStub.mazecells);
+		
+	}
+
+}

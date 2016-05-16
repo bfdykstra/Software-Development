@@ -1,0 +1,59 @@
+package falstad;
+
+public class MazeStub extends Maze {
+	
+	int px, py ; // current position on maze grid (x,y)
+	
+	// properties of the current maze
+	int mazew; // width of maze
+	int mazeh; // height of maze
+	Cells mazecells ; // maze as a matrix of cells which keep track of the location of walls
+	//Distance mazedists ; // a matrix with distance values for each cell towards the exit
+	
+
+	public MazeStub(int px, int py, int mazew, int mazeh, Cells mazecells) {
+		super();
+		this.px = px;
+		this.py = py;
+		this.mazew = mazew;
+		this.mazeh = mazeh;
+		this.mazecells = mazecells;
+		this.mazedists = mazedists;
+		
+	}
+
+	
+	public void newMaze(BSPNode root, Cells c, Distance dists, int startx, int starty) {
+		if (Cells.deepdebugWall)
+		{   // for debugging: dump the sequence of all deleted walls to a log file
+			// This reveals how the maze was generated
+			c.saveLogFile(Cells.deepedebugWallFileName);
+		}
+		// adjust internal state of maze model
+		
+		mazecells = c ;
+		mazedists = dists;
+		setCurrentPosition(startx,starty) ;
+		
+		
+	}
+	
+	
+	private void setCurrentPosition(int x, int y)
+	{
+		px = x ;
+		py = y ;
+	}
+	
+	/**
+	 * checks if the given position is outside the maze
+	 * @param x
+	 * @param y
+	 * @return true if position is outside, false otherwise
+	 */
+	private boolean isEndPosition(int x, int y) {
+		return x < 0 || y < 0 || x >= mazew || y >= mazeh;
+	}
+
+
+}

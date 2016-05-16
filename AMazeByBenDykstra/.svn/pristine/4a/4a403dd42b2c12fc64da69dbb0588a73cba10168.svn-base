@@ -1,0 +1,294 @@
+package edu.wm.cs.cs301.BenDykstra.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import edu.wm.cs.cs301.BenDykstra.falstad.CuriousMouse;
+import edu.wm.cs.cs301.BenDykstra.falstad.GraphicsWrapper;
+import edu.wm.cs.cs301.BenDykstra.falstad.ManualDriver;
+import edu.wm.cs.cs301.BenDykstra.falstad.Maze;
+import edu.wm.cs.cs301.BenDykstra.falstad.Robot;
+import edu.wm.cs.cs301.BenDykstra.falstad.WallFollower;
+import edu.wm.cs.cs301.BenDykstra.falstad.Wizard;
+
+@SuppressLint("NewApi")
+public class PlayActivity extends AppCompatActivity {
+	public final static String PATH_LENGTH = "edu.wm.cs.cs301.BenDykstra.ui.PATH_LENGTH";
+	public final static String BATTERY = "edu.wm.cs.cs301.BenDykstra.ui.BATTERY";
+	public final static String STOPPED = "edu.wm.cs.cs301.BenDykstra.ui.STOPPED";
+	ProgressBar battery;
+	TextView textView;
+	GraphicsWrapper gw;
+	Bitmap bitmap;
+	Maze maze;
+	RelativeLayout playLayout;
+	PlayActivity play = this;
+	boolean show_maze;
+	boolean show_visible;
+	boolean show_solution;
+	public Handler handler = new Handler(){
+		/*
+		@Override
+		public void handleMessage(Message message){
+			play.update();
+		}*/
+
+	};
+	
+
+	public void update(){
+		handler.postDelayed(mUpdateGraphics	, 50);
+	}
+	
+	private Runnable mUpdateGraphics = new Runnable(){
+		public void run(){
+			Log.v("!!!!!!", "in mUpdateGraphics, called from update");
+			gw.invalidate();
+			
+		}		
+	};
+	
+	private Runnable mMoveForward = new Runnable(){
+		public void run(){
+			try {
+				maze.getRobot().move(1);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			};
+		}
+	};
+	
+	
+	public void updateEnergy(int batteryLev){
+		//will want to update battery progress bar
+		
+		if( batteryLev >= 0){
+			this.battery.setProgress((int) batteryLev);
+			textView.setText("Battery: " + batteryLev);
+		}else{
+			textView.setText("Battery: " + 0);
+			this.battery.setProgress(0);
+		}
+	}
+	
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_play);
+		
+		Intent intent = getIntent();
+		
+		//get the stuff from generating activity
+		
+		maze = ((Maze) getApplicationContext());
+		//maze.setHandler(handler);
+		
+		Button rightButton = (Button) findViewById(R.id.right_button);
+		Button leftButton = (Button) findViewById(R.id.left_button);
+		Button downButton = (Button) findViewById(R.id.down_button);
+		Button upButton = (Button) findViewById(R.id.up_button);
+		Button pauseButton = (Button) findViewById(R.id.pause_button);
+		
+		
+		//PROGRESS BAR STUFF//
+		battery = (ProgressBar) findViewById(R.id.progressBar1);
+		battery.setMax(2500);
+		battery.setProgress(2500);
+		textView = (TextView) findViewById(R.id.progressbar_text);
+		
+		
+		gw = (GraphicsWrapper) findViewById(R.id.GraphicsWrapper); //is assigned canvas, bitmap and paint in its constructor
+		maze.setPlayAct(this);
+		maze.setGraphicsWrapper(gw);
+		gw.setPlay(this);
+		maze.initGraphics(); //a call to notifyViewerRedraw
+		
+		
+		String driver = intent.getStringExtra(GeneratingActivity.THE_DRIVER);
+		determineDriver(driver);
+		show_maze = intent.getExtras().getBoolean(GeneratingActivity.SHOW_MAZE);
+		show_visible = intent.getExtras().getBoolean(GeneratingActivity.SHOW_VISIBLE);
+		show_solution = intent.getExtras().getBoolean(GeneratingActivity.SHOW_SOLUTION);
+		//do stuff with the info
+		checkBoxes();
+		
+		String manual = "Manual";
+		if(driver.equals(manual)){
+			
+			rightButton.setVisibility(View.VISIBLE);
+			leftButton.setVisibility(View.VISIBLE);
+			downButton.setVisibility(View.VISIBLE);
+			upButton.setVisibility(View.VISIBLE);
+		}else{
+			pauseButton.setVisibility(View.VISIBLE);
+		}
+		
+		playLayout = (RelativeLayout) findViewById(R.id.activity_play);
+		
+		maze.getDriver().setPlayAct(this);
+		try {
+			maze.rd.drive2Exit();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void determineDriver(String driver){
+		Robot r = maze.getRobot();
+		if(driver.equals("Manual")){
+			maze.rd = new ManualDriver();
+		}else if(driver.equals("WallFollower")){
+			maze.rd = new WallFollower();
+		}else if(driver.equals("Curious Mouse")){
+			maze.rd = new CuriousMouse();
+		}else if(driver.equals("Wizard")){
+			maze.rd = new Wizard();
+		}
+		//maze.rd.setRobot(r);
+		maze.setUpDriver(maze.getWidth(), maze.getHeight(), maze.getDists(), r);
+	}
+	
+	public void checkBoxes(){
+		if(this.show_maze) maze.showMaze();
+		if(this.show_solution) maze.showSolution();
+		if(this.show_visible) maze.showVisible();
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.play, menu);
+		return true;
+	}
+	public void shortcut(int path, int battery, boolean stopped){
+		Intent intent = new Intent(this, FinishActivity.class);
+		intent.putExtra(PATH_LENGTH, path);
+		intent.putExtra(BATTERY, battery);
+		intent.putExtra(STOPPED, stopped);
+		startActivity(intent);
+	}
+	public void shortcut(View view){
+		Intent intent = new Intent(this, FinishActivity.class);
+		
+		//pathLength
+		Integer pathLength = 0;
+		//battery
+		Integer battery = 0;
+		//robot stopped
+		Boolean stopped = false;
+		
+		intent.putExtra(PATH_LENGTH, pathLength);
+		intent.putExtra(BATTERY, battery);
+		intent.putExtra(STOPPED, stopped);
+		
+		Log.v("Pathlength: ", pathLength.toString());
+		Log.v("Battery: ", battery.toString());
+		Log.v("Robot stopped: ", stopped.toString());
+		
+		CharSequence pathLengthTextToast = "PathLength: " + pathLength;
+		CharSequence batteryTextToast = "Battery: " + battery;
+		CharSequence stoppedTextToast = "Stopped: " + stopped;
+		
+		
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		
+		Toast pathToast = Toast.makeText(context, pathLengthTextToast, duration);
+		pathToast.show();
+		
+		Toast batteryToast = Toast.makeText(context, batteryTextToast, duration);
+		batteryToast.show();
+		
+		Toast stoppedToast = Toast.makeText(context, stoppedTextToast, duration);
+		stoppedToast.show();
+		
+		
+		this.startActivity(intent);
+	}
+	
+	public void keyPressedUp(View view){
+		
+		String up = "up key pressed";
+		Log.v("KEY PRESSED", up);
+		maze.upKey();
+	}
+	
+	public void keyPressedDown(View view){
+		
+		String down = "down key pressed";
+		Log.v("KEY PRESSED", down);
+		maze.downKey();
+	}
+	
+	public void keyPressedRight(View view){
+		
+		String right = "right key pressed";
+		Log.v("KEY PRESSED", right);
+		maze.rightKey();
+		
+	}
+	
+	public void keyPressedLeft(View view){
+		
+		String left = "left key pressed";
+		Log.v("KEY PRESSED", left);
+		maze.leftKey();
+		
+	}
+	
+	public void testUpdateGraphics(){
+		//this.gw.setBackground(new BitmapDrawable(gw.getResources(), gw.getBitMap()));
+		Log.v("!!!!!", "in testUpdateGraphics");
+		gw.invalidate();
+		
+	}
+	
+	
+	public void passToShowMaze(View view){
+		maze.showMaze();
+		//showMaze(!show_maze);
+	}
+	
+	public void passToShowSolution(View view){
+		maze.showSolution();
+		//showSolution(!show_solution);
+	}
+	
+	public void passToShowVisible(View view){
+		maze.showVisible();
+		//showVisible(!show_visible);
+	}
+}

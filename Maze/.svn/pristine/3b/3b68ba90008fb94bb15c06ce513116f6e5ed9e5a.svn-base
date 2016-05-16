@@ -1,0 +1,74 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class MazeBuilderTest {
+
+	MazeStub mazeStub; //// reference to the mazeStub that is constructed, results are returned by calling mazeStub.newMaze(..)
+	Thread testThread;
+	
+	@Before
+	public void setUp() throws InterruptedException{
+		
+		mazeStub = new MazeStub();
+		//TODO Modify difficulty of build, will generate some different stuff
+		mazeStub.build(1); //this then calls Mazebuilder.build() which then calls init and initializes builder attributes
+		//run() is also called and sets up a maze
+		mazeStub.mazebuilder.buildThread.join(); //we wait for this thread to die before we continue with test
+	}
+	
+	
+	
+	@Test
+	public void configTest() {
+		//MazeBuilder m1 = new MazeBuilder(true);
+		assertNotNull(mazeStub.mazebuilder.cells);
+		assertNotNull(mazeStub.mazebuilder.dists);
+		assertNotNull(mazeStub.mazebuilder.height);
+		assertNotNull(mazeStub.mazebuilder.width);
+		assertNotNull(mazeStub.mazebuilder.startx);
+		assertNotNull(mazeStub.mazebuilder.starty);
+		
+	}
+	
+	
+	@Test
+	public void entranceExitTest(){
+		
+		//tests exit
+		assertNotNull(mazeStub.mazebuilder.dists.getExitPosition());
+		int[] exit = mazeStub.mazebuilder.dists.getExitPosition();
+		int xExit = exit[0];
+		int yExit = exit[1];
+		assertTrue(mazeStub.mazebuilder.dists.isExitPosition(xExit, yExit));
+		assertTrue(mazeStub.mazebuilder.cells.isExitPosition(xExit, yExit));
+		
+		//tests start
+		assertNotNull(mazeStub.mazebuilder.dists.getStartPosition());
+		int[] start = mazeStub.mazebuilder.dists.getStartPosition();
+		
+		int xStart = start[0];
+		int yStart = start[1];
+		assertTrue(mazeStub.mazebuilder.startx == xStart);
+		assertTrue(mazeStub.mazebuilder.starty == yStart);
+		
+		
+	}
+	
+	@Test
+	public void pathwayTest(){
+		//If none of the distances are INFINITY, there should be a path between them?
+		int[][] distArray = mazeStub.mazebuilder.dists.getDists();
+		for(int i = 0; i < distArray.length; i++){
+			for(int j = 0; j < distArray.length; j++){
+				assertFalse(distArray[i][j] == mazeStub.mazebuilder.dists.INFINITY);
+			}
+		}
+		
+		int posExit = mazeStub.mazebuilder.dists.getMaxDistance();
+	}
+
+}

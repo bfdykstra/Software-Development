@@ -1,0 +1,198 @@
+package edu.wm.cs.cs301.BenDykstra.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import edu.wm.cs.cs301.BenDykstra.falstad.GraphicsWrapper;
+import edu.wm.cs.cs301.BenDykstra.falstad.Maze;
+
+@SuppressLint("NewApi")
+public class PlayActivity extends AppCompatActivity {
+	public final static String PATH_LENGTH = "edu.wm.cs.cs301.BenDykstra.ui.PATH_LENGTH";
+	public final static String BATTERY = "edu.wm.cs.cs301.BenDykstra.ui.BATTERY";
+	public final static String STOPPED = "edu.wm.cs.cs301.BenDykstra.ui.STOPPED";
+	ProgressBar battery;
+	TextView textView;
+	GraphicsWrapper gw;
+	Maze maze;
+	
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_play);
+		gw = (GraphicsWrapper) findViewById(R.id.GraphicsWrapper); //is assigned canvas, bitmap and paint in its constructor
+		
+		Intent intent = getIntent();
+		
+		//get the stuff from the generating activity
+		//maze = (Maze) intent.getSerializableExtra(GeneratingActivity.THE_MAZE);
+		maze = ((Maze) getApplicationContext());
+		String driver = intent.getStringExtra(GeneratingActivity.THE_DRIVER);
+		boolean show_maze = intent.getBooleanExtra(GeneratingActivity.SHOW_MAZE, false);
+		String show_visible = intent.getStringExtra(GeneratingActivity.SHOW_VISIBLE);
+		String show_solution = intent.getStringExtra(GeneratingActivity.SHOW_SOLUTION);
+		//do stuff with the info
+		
+		Button rightButton = (Button) findViewById(R.id.right_button);
+		Button leftButton = (Button) findViewById(R.id.left_button);
+		Button downButton = (Button) findViewById(R.id.down_button);
+		Button upButton = (Button) findViewById(R.id.up_button);
+		Button pauseButton = (Button) findViewById(R.id.pause_button);
+		
+		String manual = "Manual";
+		if(driver.equals(manual)){
+			
+			rightButton.setVisibility(View.VISIBLE);
+			leftButton.setVisibility(View.VISIBLE);
+			downButton.setVisibility(View.VISIBLE);
+			upButton.setVisibility(View.VISIBLE);
+		}else{
+			pauseButton.setVisibility(View.VISIBLE);
+		}
+		
+
+		//PROGRESS BAR STUFF//
+		battery = (ProgressBar) findViewById(R.id.progressBar1);
+		battery.setMax(2500);
+		battery.setProgress(2500);
+		textView = (TextView) findViewById(R.id.progressbar_text);
+		
+		//update progress bar text every time robot moves/rotates/senses
+		//int battery = 2500;
+		//textView.setText(battery);
+		
+		initGraphics();
+		
+		
+	}
+
+	public void initGraphics(){
+		
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.play, menu);
+		return true;
+	}
+	
+	public void shortcut(View view){
+		Intent intent = new Intent(this, FinishActivity.class);
+		
+		//pathLength
+		Integer pathLength = 0;
+		//battery
+		Integer battery = 0;
+		//robot stopped
+		Boolean stopped = false;
+		
+		intent.putExtra(PATH_LENGTH, pathLength);
+		intent.putExtra(BATTERY, battery);
+		intent.putExtra(STOPPED, stopped);
+		
+		Log.v("Pathlength: ", pathLength.toString());
+		Log.v("Battery: ", battery.toString());
+		Log.v("Robot stopped: ", stopped.toString());
+		
+		CharSequence pathLengthTextToast = "PathLength: " + pathLength;
+		CharSequence batteryTextToast = "Battery: " + battery;
+		CharSequence stoppedTextToast = "Stopped: " + stopped;
+		
+		
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		
+		Toast pathToast = Toast.makeText(context, pathLengthTextToast, duration);
+		pathToast.show();
+		
+		Toast batteryToast = Toast.makeText(context, batteryTextToast, duration);
+		batteryToast.show();
+		
+		Toast stoppedToast = Toast.makeText(context, stoppedTextToast, duration);
+		stoppedToast.show();
+		
+		
+		this.startActivity(intent);
+	}
+	
+	public void keyPressedUp(View view){
+		/**
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		CharSequence 
+		
+		Toast upToast = Toast.makeText(context, up, duration);
+		upToast.show();*/
+		String up = "up key pressed";
+		Log.v("KEY PRESSED", up);
+		maze.upKey();
+	}
+	
+	public void keyPressedDown(View view){
+		/**
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		CharSequence 
+		
+		Toast downToast = Toast.makeText(context, down, duration);
+		downToast.show();*/
+		String down = "down key pressed";
+		Log.v("KEY PRESSED", down);
+		maze.downKey();
+	}
+	
+	public void keyPressedRight(View view){
+		/**
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		CharSequence 
+		Toast rightToast = Toast.makeText(context, right, duration);
+		rightToast.show();
+		*/
+		String right = "right key pressed";
+		Log.v("KEY PRESSED", right);
+		maze.rightKey();
+		
+	}
+	
+	public void keyPressedLeft(View view){
+		/**
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		CharSequence left = "left key pressed";
+		
+		Toast leftToast = Toast.makeText(context, left, duration);
+		leftToast.show();*/
+		
+		String left = "left key pressed";
+		Log.v("KEY PRESSED", left);
+		maze.leftKey();
+		
+	}
+}

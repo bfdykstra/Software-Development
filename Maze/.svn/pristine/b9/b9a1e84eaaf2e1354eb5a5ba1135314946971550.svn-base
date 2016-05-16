@@ -1,0 +1,71 @@
+package falstad;
+
+public class MazeStub extends Maze {
+	
+	int px, py ; // current position on maze grid (x,y)
+	
+	// properties of the current maze
+	int mazew; // width of maze
+	int mazeh; // height of maze
+	Cells mazecells ; // maze as a matrix of cells which keep track of the location of walls
+	Distance mazedists ; // a matrix with distance values for each cell towards the exit
+	BSPNode rootnode ; // a binary tree type search data structure to quickly locate a subset of segments
+	
+	// Mazebuilder is used to calculate a new maze together with a solution
+	// The maze is computed in a separate thread. It is started in the local Build method.
+	// The calculation communicates back by calling the local newMaze() method.
+	MazeBuilder mazebuilder;
+
+
+	/**
+	 * Method obtains a new Mazebuilder and has it compute new maze, 
+	 * it is only used in keyDown()
+	 * @param skill level determines the width, height and number of rooms for the new maze
+	 */
+	protected void build(int skill) {
+		
+		mazebuilder = new MazeBuilder(true);
+		
+		// adjust settings and launch generation in a separate thread
+		mazew = Constants.SKILL_X[skill];
+		mazeh = Constants.SKILL_Y[skill];
+		mazebuilder.build(this, this.mazew, this.mazeh, Constants.SKILL_ROOMS[skill] );
+		// mazebuilder performs in a separate thread and calls back by calling newMaze() to return newly generated maze
+	}
+	
+	
+	public void newMaze(BSPNode root, Cells c, Distance dists, int startx, int starty) {
+		if (Cells.deepdebugWall)
+		{   // for debugging: dump the sequence of all deleted walls to a log file
+			// This reveals how the maze was generated
+			c.saveLogFile(Cells.deepedebugWallFileName);
+		}
+		// adjust internal state of maze model
+		
+		mazecells = c ;
+		mazedists = dists;
+		rootnode = root ;
+		setCurrentPosition(startx,starty) ;
+		
+		
+	}
+	
+	
+	private void setCurrentPosition(int x, int y)
+	{
+		px = x ;
+		py = y ;
+	}
+	
+	/**
+	 * checks if the given position is outside the maze
+	 * @param x
+	 * @param y
+	 * @return true if position is outside, false otherwise
+	 */
+	private boolean isEndPosition(int x, int y) {
+		return x < 0 || y < 0 || x >= mazew || y >= mazeh;
+	}
+
+
+}

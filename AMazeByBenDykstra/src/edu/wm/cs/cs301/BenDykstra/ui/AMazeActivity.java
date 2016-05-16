@@ -1,0 +1,160 @@
+package edu.wm.cs.cs301.BenDykstra.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+
+@SuppressLint("NewApi")
+public class AMazeActivity extends Activity {
+	public final static String THE_DIFF = "edu.wm.cs.cs301.BenDykstra.ui.DIFF";
+	public final static String THE_ALG = "edu.wm.cs.cs301.BenDykstra.ui.ALG";
+	public static int difficulty = 0;
+	
+	boolean fromFile = false;
+	 
+	@Override
+	/**
+	 * Provides user with difficulty options and maze generation algorithms
+	 */
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_amaze);
+		
+		//SPINNER STUFF//
+		Spinner spinner = (Spinner) findViewById(R.id.generation_options_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		        R.array.generation_spinner, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		spinner.setAdapter(adapter);
+		
+		
+		//////SEEK BAR STUFF
+		SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar_difficulty);
+		final TextView textView = (TextView) findViewById(R.id.textView_seekBar);
+		
+		// Initialize the textview with '0'.
+		textView.setText("Difficulty: " + seekBar.getProgress() + "/" + seekBar.getMax());
+		
+		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener(){
+			int progress = 0;
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar){		
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				textView.setText("Difficulty: " + seekBar.getProgress() + "/" + seekBar.getMax());	
+			}
+
+		});
+	
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.amaze, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	/** 
+	 * Called when the user presses the start button. Passes the difficulty and generation algorithm to the generating activity
+	 */
+	public void startGenerating(View view){
+		Intent intent = new Intent(this, GeneratingActivity.class);
+		//we need the generating algorithm and the difficulty level
+		
+		//difficulty
+		TextView textView = (TextView) findViewById(R.id.textView_seekBar);
+		String diff = textView.getText().toString();
+		determineDiff(diff);
+		SeekBar diffBar = (SeekBar) findViewById(R.id.seekBar_difficulty);
+		
+		
+		intent.putExtra(THE_DIFF, diffBar.getProgress() );
+		
+		
+		//logs input and creates toast
+		Log.v("The Difficulty level: ", diff);
+		
+		//generation algorithm
+		Spinner spinner = (Spinner) findViewById(R.id.generation_options_spinner);
+		String alg = spinner.getSelectedItem().toString();
+		if(alg.equals("Eller")){
+			intent.putExtra(THE_ALG, 2);
+		}else if(alg.equals("Prim")){
+			intent.putExtra(THE_ALG, 1);
+		}else if (alg.equalsIgnoreCase("Backtracking")){
+			intent.putExtra(THE_ALG, 0);
+		}else{
+			
+			intent.putExtra(THE_ALG, 3);
+		}
+		
+		startActivity(intent);
+		
+	}
+	
+	/**
+	 * parses the string difficulty into an int difficulty to pass to the generating activity
+	 * @param diff The string difficulty
+	 */
+	private void determineDiff(String diff){
+		if(diff.equals("0")) difficulty = 0;
+		else if(diff.equals("1")) difficulty = 1;
+		else if(diff.equals("2")) difficulty = 2;
+		else if(diff.equals("3")) difficulty = 3;
+		else if(diff.equals("4")) difficulty = 4;
+		else if(diff.equals("5")) difficulty = 5;
+		else if(diff.equals("6")) difficulty = 6;
+		else if(diff.equals("7")) difficulty = 7;
+		else if(diff.equals("8")) difficulty = 8;
+		else if(diff.equals("9")) difficulty = 9;
+		else if(diff.equals("10")) difficulty = 10;
+		else if(diff.equals("11")) difficulty = 11;
+		else if(diff.equals("12")) difficulty = 12;
+		else if(diff.equals("13")) difficulty = 13;
+		else if(diff.equals("14")) difficulty = 14;
+		else if(diff.equals("15")) difficulty = 15;
+		else{
+			difficulty = 0;
+		}
+			
+		
+	}
+}

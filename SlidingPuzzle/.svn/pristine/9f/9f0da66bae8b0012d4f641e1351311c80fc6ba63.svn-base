@@ -1,0 +1,89 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+import edu.wm.cs.cs301.slidingpuzzle.PuzzleState.Operation;
+
+public class BFSSolver implements PuzzleSolver {
+	
+	private PuzzleState initState ; //field for the initial state
+	private PuzzleState goalState ; //field for the goal state
+
+	@Override
+	public boolean configure(int[] initial, int[] goal) {
+		// TODO Auto-generated method stub
+		
+		if (initial == null || goal == null) {
+			return false;
+		}
+		
+		initState.setState(initial);
+		goalState.setState(goal);
+		return true; //need to figure out under what circumstances false would be returned - 
+		//why it would not configure correctly
+	}
+
+	@Override
+	public Operation[] movesToSolve() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	/**
+	 * Gets the initial state of the puzzle
+	 */
+	public PuzzleState getSolverInitialState() {
+		
+		return initState;
+	}
+
+	@Override
+	/**
+	 * Gets the final desired state
+	 */
+	public PuzzleState getSolverFinalState() {
+		
+		return goalState;
+	}
+
+	@Override
+	public int getNumberOfStatesExplored() {
+		
+		return goalState.getDistance();
+	}
+
+	@Override
+	public int getMaxSizeOfQueue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	
+	/**Gets the index of the zero in the gameState array.
+	 * 
+	 * @param gameState
+	 * @return i The index of the zero
+	 */
+	private int getZeroNdx(int[] gameState) {
+		
+		int i =0;
+		for (i = 0; i < gameState.length; i++){
+			if (gameState[i] == 0){
+				break;
+			}
+		}
+		return i;
+	}
+	
+	/** Gets what would be the width of a square grid.
+	 * Does so by taking the square root of the length of the array.
+	 * 
+	 * @return width of 2d array
+	 */
+	private int getWidth(PuzzleState gameState) {
+		
+		double l = gameState.getState().length;
+		int width = (int) Math.sqrt(l);
+		return width;
+		
+	}
+
+}

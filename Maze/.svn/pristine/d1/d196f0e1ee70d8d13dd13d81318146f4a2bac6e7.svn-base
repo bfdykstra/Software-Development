@@ -1,0 +1,9 @@
+package falstad;
+
+public class GraphicsWrapper extends MazePanel {
+
+	public GraphicsWrapper() {
+		// TODO Auto-generated constructor stub
+	}
+
+}

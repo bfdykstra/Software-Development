@@ -1,0 +1,170 @@
+package edu.wm.cs.cs301.BenDykstra.falstad;
+/**
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+*/
+
+
+
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.os.Message;
+import android.util.AttributeSet;
+import android.view.View;
+import edu.wm.cs.cs301.BenDykstra.ui.PlayActivity;
+//import falstad.Constants;
+//import falstad.GraphicsWrapper;
+//import falstad.GraphicsWrapper.gwColor;
+
+public class GraphicsWrapper extends View {
+	Canvas canvas;
+	Paint paint;
+	Bitmap bitMap; 
+	PlayActivity play;
+	
+	
+	/**
+	 * constructor that initializes a bitmap, canvas and paint to each other.
+	 * @param context
+	 * @param attrs
+	 */
+	public GraphicsWrapper(Context context, AttributeSet attrs) {
+		
+		super(context, attrs);
+		//super();
+		bitMap = Bitmap.createBitmap(Constants.VIEW_WIDTH, Constants.VIEW_HEIGHT, Bitmap.Config.ARGB_8888);
+		canvas = new Canvas(bitMap);
+		paint = new Paint();
+		paint.setStyle(Paint.Style.FILL);
+	}
+	
+	public enum gwColor {black, darkGray, white, red, blue, yellow, orange, gray}
+	
+	public void setPlay(PlayActivity act){
+		this.play = act;
+	}
+	
+	public void update(){
+		invalidate();
+	}
+	protected void onDraw(Canvas c){
+		super.onDraw(c);
+		//paint = new Paint();
+		//paint.setStyle(Paint.Style.FILL);
+		c.drawBitmap(bitMap, 0 ,0, paint);
+		//this.draw(c);
+		
+	}
+	
+	
+	static float[] getColorValuesWithInt(int col){
+		//Color c = new Color(col);
+		
+		//float[] array = {c.getRed(), c.getGreen(), c.getBlue()};
+		//return array;
+		
+		return null;
+	}
+	
+	public static int getColorValues(float[] color){
+		//Color c = new Color(color[0], color[1], color[2]);
+		//use float array on a 
+		//return c.getRGB();
+		return 0;
+	}
+	
+	public void setColorWithArray(float[] col){
+		//Color c = new Color((int) col[0],(int) col[1], (int) col[2]);
+		//gc.setColor(c);
+		paint.setColor(Color.rgb((int) col[0], (int) col[1], (int) col[2]));
+	}
+	public void setColor(gwColor c){
+		
+		
+		int actualColor = 0;
+		if(c == gwColor.black){
+			actualColor = Color.BLACK;
+		} else if( c == gwColor.darkGray){
+			actualColor = Color.DKGRAY;
+		} else if(c == gwColor.white){
+			actualColor = Color.WHITE;
+		} else if(c == gwColor.red){
+			actualColor = Color.RED;
+		} else if(c == gwColor.blue){
+			actualColor = Color.BLUE;
+		} else if(c == gwColor.yellow){
+			actualColor = Color.YELLOW;
+		} else if(c == gwColor.orange){
+			actualColor = Color.CYAN;
+		} else if(c == gwColor.gray){
+			actualColor = Color.GRAY;
+		}
+		
+		paint.setColor(actualColor);
+		
+		
+	}
+	
+	public void fillRect(int x, int y, int width, int height){
+		paint.setStyle(Paint.Style.FILL);
+		canvas.drawRect(x, y, x+width, y + height, paint);
+	
+		//gc.fillRect(x, y, width, height);
+		
+	}
+	
+	public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints){
+		//gc.fillPolygon(xPoints, yPoints, nPoints);
+		paint.setStyle(Paint.Style.FILL);
+		Path path = new Path();
+		path.reset();
+		path.moveTo(xPoints[0], yPoints[0]);
+		for(int i = 1; i < xPoints.length; i++){
+			path.lineTo(xPoints[i], yPoints[i]);
+		}
+		path.lineTo(xPoints[0], yPoints[0]);
+		
+		canvas.drawPath(path, paint);
+		
+	}
+
+	public void drawLine(int nx1, int ny1, int nx2, int ny12) {
+		//gc.drawLine(nx1, ny1, nx2, ny12);
+		canvas.drawLine(nx1, ny1, nx2, ny12, paint);
+		
+	}
+
+	
+	public void fillOval(int i, int j, int width, int height) {
+		//gc.fillOval(i, j, cirsiz, cirsiz2);
+		paint.setStyle(Paint.Style.FILL);
+		
+		canvas.drawOval(new RectF(i, j, width + i, j + height), paint);
+		
+	}
+	
+	public Bitmap getBitMap(){
+		return this.bitMap;
+	}
+	
+	/**
+	public void centerString(GraphicsWrapper g, String str, int ypos, Font f) {
+		gc.setFont(f);
+		FontMetrics fm = g.getFontMetrics();
+		g.drawString(str, (Constants.VIEW_WIDTH-fm.stringWidth(str))/2, ypos);
+	}
+	
+	public static Font smallBannerFont = new Font("TimesRoman", Font.BOLD, 16);
+	public static Font largeBannerFont = new Font("TimesRoman", Font.BOLD, 48);
+	*/
+
+}

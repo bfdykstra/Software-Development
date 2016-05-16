@@ -1,0 +1,45 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class WizardTest {
+	BasicRobot myRobot; //robot that is being tested
+	MazeApplication a;
+
+	@Before
+	public void setUp() throws Exception {
+		SingleRandom.setSeed(17);
+		myRobot = new BasicRobot();
+		a = new MazeApplication("Eller");
+		a.repaint();
+		//0 = 48, 1 = 49
+		a.maze.keyDown(50);
+		a.maze.mazebuilder.buildThread.join();
+		
+		myRobot.setMaze(a.maze);
+		a.maze.robot = myRobot;
+	}
+
+	@Test
+	public void testDrive2Exit() {
+		RobotDriver wiz = new Wizard();
+		wiz.setRobot(myRobot);
+		wiz.setDimensions(a.maze.mazew, a.maze.mazeh);
+		wiz.setDistance(a.maze.mazedists);
+		try {
+			assertTrue(wiz.drive2Exit());
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("energy consumed: " + wiz.getEnergyConsumption());
+		System.out.println("steps taken: " + wiz.getPathLength());
+		
+	}
+
+}

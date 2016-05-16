@@ -1,0 +1,52 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class WizardTest {
+	BasicRobot myRobot; //robot that is being tested
+	MazeApplication a;
+
+	@Before
+	public void setUp() throws Exception {
+		SingleRandom.setSeed(17);
+		myRobot = new BasicRobot();
+		a = new MazeApplication("Eller");
+		a.repaint();
+		//0 = 48, 1 = 49
+		a.maze.testing = true;
+		a.maze.keyDown(56);
+		a.maze.mazebuilder.buildThread.join();
+		
+		myRobot.setMaze(a.maze);
+		a.maze.robot = myRobot;
+	}
+
+	@Test
+	/**
+	 * should find the exit in less than or equal to the distance value of it's starting position
+	 */
+	public void testDrive2Exit() {
+		RobotDriver wiz = new Wizard();
+		wiz.setRobot(myRobot);
+		wiz.setDimensions(a.maze.mazew, a.maze.mazeh);
+		wiz.setDistance(a.maze.mazedists);
+		try {
+			assertTrue(wiz.drive2Exit());
+			assertTrue(wiz.getPathLength() <= a.maze.mazedists.getDistance(0, 0));
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("energy consumed: " + wiz.getEnergyConsumption());
+		System.out.println("steps taken: " + wiz.getPathLength());
+		System.out.println("Distance from starting 0, 0: " + a.maze.mazedists.getDistance(0, 0));
+		
+		
+	}
+
+}

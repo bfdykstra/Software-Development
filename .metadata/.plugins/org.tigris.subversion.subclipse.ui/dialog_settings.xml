@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="154" key="DifferencesDialog.location.y"/>
+	<item value="92" key="HistoryTableProvider.HistoryDialog.Date"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/svncs301/tags/release2.1" key="UrlCombo.Maze.2"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/svncs301/tags/release2.0" key="UrlCombo.Maze.3"/>
+	<item value="572" key="HistoryDialog.location.x"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/svncs301/tags/release3.0" key="UrlCombo.Maze.0"/>
+	<item value="163" key="HistoryDialog.location.y"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/tags/release3.0" key="UrlCombo.Maze.1"/>
+	<item value="727" key="DifferencesDialog.size.x"/>
+	<item value="85" key="HistoryTableProvider.SVNHistoryPage.Revision"/>
+	<item value="422" key="DifferencesDialog.size.y"/>
+	<item value="592" key="SwitchDialogWithConflictHandling.size.x"/>
+	<item value="812" key="SwitchDialogWithConflictHandling.size.y"/>
+	<item value="421" key="HistoryTableProvider.SVNHistoryPage.Comment"/>
+	<item value="424" key="DifferencesDialog.location.x"/>
+	<item value="333" key="HistoryDialog.weights.0"/>
+	<item value="74" key="HistoryTableProvider.HistoryDialog.Author"/>
+	<item value="82" key="CommitDialog.location.y"/>
+	<item value="219" key="CommitDialog.location.x"/>
+	<item value="333" key="HistoryDialog.weights.2"/>
+	<item value="333" key="HistoryDialog.weights.1"/>
+	<item value="500" key="CommitDialog.weights.0"/>
+	<item value="500" key="CommitDialog.weights.1"/>
+	<item value="37" key="HistoryTableProvider.HistoryDialog.Revision"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/svncs301/AMazeByBenDykstra" key="UrlCombo.AMazeByBenDykstra.1"/>
+	<item value="634" key="CommitDialog.size.y"/>
+	<item value="1130" key="CommitDialog.size.x"/>
+	<item value="211" key="HistoryTableProvider.SVNHistoryPage.Date"/>
+	<item value="svn+ssh://pepe.cs.wm.edu/home/f85/bfdyks/svncs301/tags/release7.0" key="UrlCombo.AMazeByBenDykstra.0"/>
+	<item value="168" key="HistoryTableProvider.SVNHistoryPage.Author"/>
+	<item value="true" key="BranchTagDialog.makeParents"/>
+	<item value="477" key="ChooseUrlDialog.size.x"/>
+	<item value="527" key="BranchTag.location.x"/>
+	<item value="163" key="BranchTag.location.y"/>
+	<item value="349" key="ChooseUrlDialog.size.y"/>
+	<item value="571" key="ChooseUrlDialog.location.x"/>
+	<item value="367" key="BranchTag.size.y"/>
+	<item value="400" key="HistoryDialog.size.x"/>
+	<item value="114" key="ChooseUrlDialog.location.y"/>
+	<item value="565" key="BranchTag.size.x"/>
+	<item value="23" key="SwitchDialogWithConflictHandling.location.y"/>
+	<item value="400" key="HistoryDialog.size.y"/>
+	<item value="183" key="HistoryTableProvider.HistoryDialog.Comment"/>
+	<item value="476" key="SwitchDialogWithConflictHandling.location.x"/>
+	<section name="CommitWizard">
+		<item value="500" key="VWeight2"/>
+		<item value="350" key="HWeight1"/>
+		<item value="650" key="HWeight2"/>
+		<item value="500" key="VWeight1"/>
+		<item value="true" key="ShowCompare"/>
+	</section>
+</section>

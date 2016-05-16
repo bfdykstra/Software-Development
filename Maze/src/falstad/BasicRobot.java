@@ -1,0 +1,639 @@
+package falstad;
+
+
+/**
+ * A BasicRobot that is operated on by RobotDriver
+ * @author Benjamin Dykstra
+ */
+public class BasicRobot implements Robot {
+	
+	private float battery = 2500; //holds how much battery is left in the robot
+	private int numSteps = 0; //the total number of steps taken
+	private Maze maze; //the maze that the robot is operating in
+	private boolean stopped ;
+	private int[] EAST = {1, 0};
+	private int[] WEST = {-1, 0};
+	private int[] SOUTH = {0,-1};
+	private int[] NORTH = {0, 1};
+	
+	public BasicRobot() {
+		
+	}
+	
+	/**
+	 * @return the number of steps taken by the robot
+	 */
+	public int getNumSteps(){
+		return this.numSteps;
+	}
+
+	
+	public void rotate(Turn turn) throws Exception {
+		
+		if(this.battery - 3 >= 0 && (turn == Turn.LEFT || turn == Turn.RIGHT)){
+			switch(turn){
+			case LEFT:
+				this.maze.rotate(1);
+				this.battery = this.battery - 3;
+				break;
+			case RIGHT:
+				maze.rotate(-1);
+				this.battery = this.battery - 3;
+				break;
+			
+			}
+			
+		} else if(this.battery - 6 >= 0 && turn == Turn.AROUND){
+			maze.rotate(1);
+			maze.rotate(1);
+			this.battery = this.battery - 6;
+			
+		}else{
+			System.out.println("Battery went below 0; not allowed");
+			stopped = true;
+			maze.state = Constants.STATE_LOST;
+			maze.notifyViewerRedraw();
+			throw new Exception();
+			
+		}
+	}
+
+	
+	public void move(int distance) throws Exception {
+		
+		for(int i = 0; i < distance; i++){
+			//checks to see if forward direction has a wall in front of it
+			boolean canGo = maze.checkMove(1);
+			if((battery - 5 >= 0) && canGo){
+				//stopped = false;
+				battery = battery -5;
+				numSteps++;
+				this.maze.walk(1); //won't move backwards which would be -1
+			}
+			else{
+				if(battery - 5 < 0){
+					stopped = true;
+				}
+				maze.state = Constants.STATE_LOST;
+				maze.notifyViewerRedraw();
+				System.out.println("Moving would cause battery to go below 5. Current battery level: " + battery 
+						+ " or, cannot move this way");
+				throw new Exception();
+			}
+		}
+	}
+	
+	
+	/**
+	 * sets the number of steps taken by a robot back to zero. Called in maze.build() so that pathlengths are not 
+	 * carried over from game to game
+	 */
+	public void resetNumSteps(){
+		this.numSteps = 0;
+	}
+	
+	/**
+	 * returns the current position [x,y] of the robot
+	 */
+	public int[] getCurrentPosition() {
+		
+			int[] curPosition = {this.maze.px, this.maze.py};
+			return curPosition;
+	}
+
+	
+	public void setMaze(Maze maze) {
+		this.maze = maze;
+	}
+
+	/**
+	 * returns true if the robot is at the exit, false otherwise
+	 */
+	public boolean isAtGoal() {
+		int x = this.getCurrentPosition()[0];
+		int y = this.getCurrentPosition()[1];
+	
+		return maze.mazecells.isExitPosition(x, y);
+		
+	}
+
+	/**
+	 * returns true if the exit is in the direct line of sight of the given direction
+	 */
+	public boolean canSeeGoal(Direction direction)  throws UnsupportedOperationException{
+		
+		int canSee = distanceToObstacle(direction);
+		
+		return (canSee == Integer.MAX_VALUE);
+		
+		
+	}
+	
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		
+		return maze.mazecells.isInRoom(maze.px, maze.py);
+	
+	}
+
+	
+	public boolean hasRoomSensor() {
+		return true;
+	}
+
+	
+	public int[] getCurrentDirection() {
+		
+		int[] curDir = {this.maze.dx, this.maze.dy};
+		return curDir;
+	}
+
+	public float getBatteryLevel() {
+		
+		return this.battery;
+		
+	}
+
+	
+	public void setBatteryLevel(float level) {
+		
+		this.battery = level;
+
+	}
+
+	
+	public float getEnergyForFullRotation() {
+		
+		return 12;
+	}
+
+	
+	public float getEnergyForStepForward() {
+		
+		return 5;
+	}
+
+	
+	public boolean hasStopped() {
+		
+		return stopped;
+	}
+
+	
+	public int distanceToObstacle(Direction direction) throws UnsupportedOperationException  {
+		
+		int[] curDir = this.getCurrentDirection();
+		int[] curPos = this.getCurrentPosition();
+		
+		int dist = 0;
+		
+		//need a distance to obstacle if robot is at exit.
+		boolean isAtGoal = this.isAtGoal();
+		if(isAtGoal){
+			//do distance to obstacle w/out exit check. need to check that x and y values dont go out of bounds
+			if(this.arrayEquals(curDir, EAST)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					try{
+						while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+							tempX++;
+							dist++;
+						}
+						return dist;
+					} catch(ArrayIndexOutOfBoundsException e){
+						return Integer.MAX_VALUE;
+					}
+					
+				case RIGHT:
+					//tracks downward
+					try{
+						while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+							tempY--;
+							dist++;
+						}
+						return dist;
+					} catch(ArrayIndexOutOfBoundsException e){
+						return Integer.MAX_VALUE;
+					}
+					
+				case LEFT:
+					//tracks up
+					try{
+						while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+							tempY++;
+							dist++;
+						}
+						return dist;
+					} catch(ArrayIndexOutOfBoundsException e){
+						return Integer.MAX_VALUE;
+					}
+					
+				case BACKWARD:
+					//tracks down
+					try{
+						while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+							tempX--;
+							dist++;
+						}
+						return dist;
+					} catch(ArrayIndexOutOfBoundsException e){
+						return Integer.MAX_VALUE;
+					}
+				}
+			}else if(this.arrayEquals(curDir, WEST)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					try{
+						while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+							tempX--;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						return Integer.MAX_VALUE;
+					}
+					
+				case RIGHT:
+					//tracks downward
+					try{
+						while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+							tempY++;
+							dist++;
+						}
+						return dist;
+					} catch(ArrayIndexOutOfBoundsException e){
+	
+						return Integer.MAX_VALUE;
+					}
+					
+				case LEFT:
+					//tracks up
+					try{
+						while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+							tempY--;
+							dist++;
+						}
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+					return dist; //may have to be dist -1
+				case BACKWARD:
+					//tracks down
+					try{
+						while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+							tempX++;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+					
+				}
+			}else if(this.arrayEquals(curDir, SOUTH)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					try{
+						while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+							tempY--;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+				case RIGHT:
+					//tracks downward
+					try{
+						while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+							tempX--;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+				case LEFT:
+					//tracks up
+					try{
+						while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+							tempX++;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					 
+				case BACKWARD:
+					//tracks down
+					try{
+						while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+							tempY++;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}	
+				}
+				
+			}else if(this.arrayEquals(curDir, NORTH)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					try{
+						while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+							tempY++;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+				case RIGHT:
+					//tracks downward
+					try{
+						while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+							tempX++;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+					
+				case LEFT:
+					//tracks up
+					try{
+						while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+							tempX--;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+				case BACKWARD:
+					//tracks down
+					try{
+						while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+							tempY--;
+							dist++;
+						}
+						return dist;
+					}catch(ArrayIndexOutOfBoundsException e){
+						
+						return Integer.MAX_VALUE;
+					}
+				}
+			}
+		}
+		if(battery - 1 >= 0){
+			battery = battery - 1;
+		}
+		else{
+			stopped = true;
+			maze.state = Constants.STATE_LOST;
+			maze.notifyViewerRedraw();
+			System.out.println("Sensing would cause battery to go below 0. Current battery level: " + battery);
+		}
+		if(this.arrayEquals(curDir, EAST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY) ){
+						return Integer.MAX_VALUE;
+					}
+					tempX++;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY--;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY++;
+					dist++;
+				}
+				return dist;
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX--;
+					dist++;
+				}
+				return dist;
+				
+			}
+		}else if(this.arrayEquals(curDir, WEST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX--;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY++;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY--;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX++;
+					dist++;
+				}
+				return dist;
+				
+			}
+		}else if(this.arrayEquals(curDir, SOUTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY--;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX--;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX++;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY++;
+					dist++;
+				}
+				return dist;
+				
+			}
+			
+		}else if(this.arrayEquals(curDir, NORTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY++;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX++;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempX--;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					if(maze.mazecells.isExitPosition(tempX, tempY)){
+						return Integer.MAX_VALUE;
+					}
+					tempY--;
+					dist++;
+				}
+				return dist;
+			}
+		}
+		
+		return 0;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		return true;
+	}
+	
+	/**
+	 * tests whether two arrays are equal
+	 * @param a1
+	 * @param a2
+	 * @return
+	 */
+	protected boolean arrayEquals(int[] a1, int[] a2){
+		if(a1.length != a2.length){
+			return false;
+		}
+		for(int i = 0; i < a1.length; i++){
+			if( a1[i] != a2[i]){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+}

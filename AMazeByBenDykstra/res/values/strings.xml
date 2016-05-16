@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AMazeByBenDykstra</string>
+    <string name="welcome_message">Welcome to the MAZE!!!</string>
+    <string name="spinner_generation">Select a Maze Generation Algorithm</string>
+    <string name="seekbar_skill_level">Select a Skill Level</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_amaze">AMazeActivity</string>
+
+    <string-array name="generation_spinner">
+        <item>Backtracking</item>
+        <item>Eller</item>
+        <item>Prim</item>
+        <item>File</item>
+    </string-array>
+
+    <string name="seekbar_skill">Select a skill level: </string>
+    <string name="start_button">Start!</string>
+    <string name="title_activity_generating">GeneratingActivity</string>
+    <string name="percent_maze_generation">Maze Generation</string>
+
+    <string-array name="driver_algorithm_spinner">
+        <item>Manual</item>
+        <item>WallFollower</item>
+        <item>Curious Mouse</item>
+        <item>Wizard</item>
+    </string-array>
+
+    <string name="spinner_driver">Select a Robot Driver</string>
+    <string name="show_maze">Show maze?</string>
+    <string name="show_visible">Show visible walls?</string>
+    <string name="show_solution">Show solution?</string>
+    <string name="play_button">Play!</string>
+    <string name="title_activity_play">PlayActivity</string>
+    <string name="playing_maze">This is where we play the maze!!</string>
+    <string name="title_activity_finish">FinishActivity</string>
+    
+    
+    
+    <string name = "finish_title">You Finished!</string>
+    <string name = "lost_title">You Lost!</string>
+    <string name = "energy_consumption">Energy used: </string>
+    <string name = "path_length">Steps taken: </string>
+    <string name = "robot_stopped">Robot stopped:  </string>
+    <string name = "save_maze">Would you like to save this maze?</string>
+    <string name = "left_arrow">&lt;</string>
+    <string name = "right_arrow">&gt;</string>
+
+</resources>

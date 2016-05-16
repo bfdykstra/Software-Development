@@ -1,0 +1,389 @@
+package falstad;
+
+import java.awt.Event;
+import java.util.ArrayList;
+
+public class BasicRobot implements Robot {
+	
+	int battery = 2500; //holds how much battery is left in the robot
+	int numSteps = 0; //the total number of steps taken
+	Maze maze; //the maze that the robot is operating in
+	int curX; //the current x position
+	int curY; //the current y position
+
+	public BasicRobot() {
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void rotate(Turn turn) throws Exception {
+		// TODO Add print statements, throw exception for running out of battery and hasStopped
+		//104 codes for a left turn in key down and 108 codes for a right turn
+		if(this.battery - 3 > 0){
+			if( turn == Turn.LEFT){
+				//this.maze.keyDown(104)
+				this.maze.rotate(1);
+			} else if(turn == Turn.RIGHT){
+				maze.rotate(-1);
+				//this.maze.keyDown(108);
+			} else{
+				maze.rotate(1);
+				maze.rotate(1);
+				//this.maze.keyDown(104);
+				//this.maze.keyDown(104);
+			}
+			this.battery = this.battery - 3;
+		} else{
+			System.out.println("Battery went below 0; not allowed");
+			throw new Exception();
+			
+		}
+	}
+
+	@Override
+	public void move(int distance) throws Exception {
+		// TODO Auto-generated method stub
+		for(int i = 0; i <= distance; i++){
+			//checks to see if forward direction has a wall in front of it
+			boolean canGo = maze.checkMove(1);
+			if((battery - 5 > 0) && canGo){
+				this.maze.walk(1); //won't move backwards which would be -1
+				battery = battery -5;
+			}
+			else{
+				System.out.println("Moving would cause battery to go below 5. Current battery level: " + battery 
+						+ " or, cannot move this way");
+				throw new Exception();
+			}
+		}
+
+	}
+	
+	/**
+	 * returns the direction relative to the robot of the location of walls
+	 * @param curDir
+	 */
+	public ArrayList<Direction> sensor(int[] curDir){
+		
+		int[] EAST = {1, 0};
+		int[] WEST = {-1, 0};
+		int[] SOUTH = {0,-1};
+		int[] NORTH = {0, 1};
+		ArrayList<Direction> dirList = new ArrayList<Direction>();
+		if(EAST.equals(curDir) ){
+			//left
+			if(maze.mazecells.hasWallOnTop(curX, curY)){
+				//boolean left = maze.mazecells.hasWallOnLeft(curX, curY);
+				dirList.add(Direction.LEFT);
+			} 
+			//right
+			else if(maze.mazecells.hasWallOnBottom(curX, curY)){
+				//boolean right = maze.mazecells.hasWallOnLeft(curX, curY);
+				dirList.add(Direction.RIGHT);
+			}
+			//front
+			else if(maze.mazecells.hasWallOnRight(curX, curY)){
+				//boolean front = maze.mazecells.hasWallOnTop(curX, curY);
+				dirList.add(Direction.FORWARD);
+			}
+			return dirList;
+		}
+		else if(WEST.equals(curDir) ){
+			//left
+			if(maze.mazecells.hasWallOnBottom(curX, curY)){
+				dirList.add(Direction.LEFT);
+			}
+			//right
+			else if(maze.mazecells.hasWallOnTop(curX, curY)){
+				dirList.add(Direction.RIGHT);
+			}
+			//front
+			else if(maze.mazecells.hasWallOnLeft(curX, curY)){
+				dirList.add(Direction.FORWARD);
+			}
+			return dirList;
+		}
+		else if(SOUTH.equals(curDir)){
+			//left
+			if(maze.mazecells.hasWallOnRight(curX, curY)){
+				dirList.add(Direction.RIGHT);
+			}
+			//right
+			else if(maze.mazecells.hasWallOnLeft(curX, curY)){
+				dirList.add(Direction.LEFT);
+			}
+			//front
+			else if(maze.mazecells.hasWallOnBottom(curX, curY)){
+				dirList.add(Direction.FORWARD);
+			}
+			return dirList;
+		}
+		else if(NORTH.equals(curDir)){
+			//left
+			if(maze.mazecells.hasWallOnLeft(curX, curY)){
+				dirList.add(Direction.LEFT);
+			}
+			//right
+			else if(maze.mazecells.hasWallOnRight(curX, curY)){
+				dirList.add(Direction.RIGHT);
+			}
+			//front
+			else if(maze.mazecells.hasWallOnTop(curX, curY)){
+				dirList.add(Direction.FORWARD);
+			}
+			return dirList;
+		}
+		return null;
+		
+	}
+
+	@Override
+	public int[] getCurrentPosition() {
+		// TODO Auto-generated method stub
+		
+			int[] curPosition = {this.maze.px, this.maze.py};
+			return curPosition;
+		/**	
+		 catch(NullPointerException e){
+			System.err.println("the current position must be set");
+			return null;
+		} catch(IndexOutOfBoundsException e){
+			System.err.println("position outside of maze");
+			return null;
+		}
+		/*
+		 * 
+		 */
+	}
+
+	@Override
+	public void setMaze(Maze maze) {
+		// TODO Auto-generated method stub
+		this.maze = maze;
+
+	}
+
+	@Override
+	public boolean isAtGoal() {
+		// TODO Auto-generated method stub
+		if(this.maze.mazecells.isExitPosition(curX, curY)){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		// TODO Auto-generated method stub
+		if(this.maze.mazecells.isInRoom(curX, curY)){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int[] getCurrentDirection() {
+		// TODO Auto-generated method stub
+		int[] curDir = {this.maze.dx, this.maze.dy};
+		return curDir;
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		// TODO Auto-generated method stub
+		return 6;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		// TODO Auto-generated method stub
+		return 5;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) {
+		// TODO Auto-generated method stub
+		int[] curDir = this.getCurrentDirection();
+		int[] curPos = this.getCurrentPosition();
+		int[] EAST = {1, 0};
+		int[] WEST = {-1, 0};
+		int[] SOUTH = {0,-1};
+		int[] NORTH = {0, 1};
+		int dist = 1;
+		if(curDir.equals(EAST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					tempX++;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					tempY++;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					tempY--;
+					dist++;
+				}
+				return dist;
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					tempX--;
+					dist++;
+				}
+				return dist;
+				
+			}
+		}else if(curDir.equals(WEST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					tempX--;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					tempY--;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					tempY++;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					tempX++;
+					dist++;
+				}
+				return dist;
+				
+			}
+		}else if(curDir.equals(SOUTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					tempY++;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					tempX--;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					tempY++;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					tempY--;
+					dist++;
+				}
+				return dist;
+				
+			}
+			
+		}else if(curDir.equals(NORTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+					tempY--;
+					dist++;
+				}
+				return dist;
+			case RIGHT:
+				//tracks downward
+				while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+					tempX++;
+					dist++;
+				}
+				return dist;
+			case LEFT:
+				//tracks up
+				while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+					tempY--;
+					dist++;
+				}
+				return dist; //may have to be dist -1
+			case BACKWARD:
+				//tracks down
+				while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+					tempY++;
+					dist++;
+				}
+				return dist;
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+}

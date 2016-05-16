@@ -1,0 +1,158 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.Test;
+
+import falstad.Robot.Direction;
+import falstad.Robot.Turn;
+
+public class BasicRobotTest {
+	BasicRobot myRobot; //robot that is being tested
+	SimpleKeyListener keys;
+	
+	public BasicRobotTest() throws InterruptedException{
+		
+		myRobot = new BasicRobot();
+		MazeApplication a = new MazeApplication("Eller");
+		
+		//key code characters 0 = 48, 1 = 49, 2 = 50
+		a.maze.dx = 1;
+		a.maze.dy = 0;
+		a.maze.keyDown(48);
+		myRobot.setMaze(a.maze);
+		//MazeApplication a = new MazeApplication("test/data/input.xml");
+		
+		//a.maze.keyDown(0);
+		//Maze newMaze = new Maze();
+		//newMaze.method = 2; //makes it ellers algorithm
+		//a.maze.build(5);
+		//myRobot.maze = a.maze;
+		
+	}
+
+	
+	@Test
+	public void testRotate() {
+		try {
+			//Always facing east at start
+			int[] targetDir = myRobot.getCurrentDirection();
+			System.out.println("Target dir: " + targetDir[0] + ", " + targetDir[1]);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.rotate(Turn.RIGHT);
+			myRobot.rotate(Turn.AROUND);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.rotate(Turn.LEFT);
+			int[] newCurDir = myRobot.getCurrentDirection();
+			boolean areTheyEqual = myRobot.arrayEquals(targetDir, newCurDir);
+			assertTrue(areTheyEqual);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Test
+	public void testMove() {
+		System.out.println("Current Direction in testMove: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		try {
+			myRobot.move(11); //brings up right to end of hall
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Test
+	public void testSensor() {
+		System.out.println("Current Direction in testSensor: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		//int[] dir = myRobot.getCurrentDirection();
+		int[] curPos = myRobot.getCurrentPosition();
+		System.out.println("At position: " + curPos[1] + "," + curPos[0] + " there should be left and right");
+		ArrayList<Direction> expectedDir = new ArrayList<Direction>();
+		expectedDir.add(Direction.LEFT);
+		expectedDir.add(Direction.RIGHT);
+		
+		ArrayList<Direction> dirList = myRobot.sensor(myRobot.getCurrentDirection());
+		
+		
+		if(!(dirList.contains(expectedDir.get(0)) && dirList.contains(expectedDir.get(0))) ){
+			fail("dirList did not contain the expected directions.");
+		}
+		
+		
+		try {
+			myRobot.move(11); // puts robot at the end of hall
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ArrayList<Direction> newExpectedDir = new ArrayList<Direction>();
+		newExpectedDir.add(Direction.FORWARD);
+		newExpectedDir.add(Direction.RIGHT);
+		
+		ArrayList<Direction> newDirList = myRobot.sensor(myRobot.getCurrentDirection());
+		
+		if(!(newDirList.contains(newExpectedDir.get(0)) && newDirList.contains(newExpectedDir.get(0))) ){
+			fail("dirList did not contain the expected directions.");
+		}	
+	} 
+
+	@Test
+	public void testGetCurrentPosition() {
+		System.out.println("Current Direction in testGetCurrentPosition: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		int[] curPos = myRobot.getCurrentPosition();
+		assertNotNull(curPos);
+		
+	}
+
+	@Test
+	public void testSetMaze() {
+		System.out.println("Current Direction in testSetMaze: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		//should have been set in setup()
+		assertNotNull(myRobot.maze);
+	}
+
+	
+	@Test
+	public void testCanSeeGoal() {
+		System.out.println("Current Direction in testCanSeeGoal: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testIsInsideRoom() {
+		System.out.println("Current Direction in testIsInsideRoom: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		assertFalse(myRobot.isInsideRoom());
+	}
+
+
+	@Test
+	public void testGetEnergyForFullRotation() {
+		System.out.println("Current Direction in FullRotation: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		assertTrue(6 == myRobot.getEnergyForFullRotation());
+	}
+
+	@Test
+	public void testGetEnergyForStepForward() {
+		System.out.println("Current Direction in StepForward: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		assertTrue(myRobot.getEnergyForStepForward() == 5);
+	}
+
+	@Test
+	public void testHasStopped() {
+		System.out.println("Current Direction in testHasStopped: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testDistanceToObstacle() {
+		System.out.println("Current Direction in testDistanceToObstacle: " + myRobot.getCurrentDirection()[0] + ", " + myRobot.getCurrentDirection()[1]);
+		fail("Not yet implemented");
+	}
+
+}

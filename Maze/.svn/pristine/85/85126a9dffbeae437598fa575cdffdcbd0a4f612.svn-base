@@ -1,0 +1,398 @@
+package falstad;
+
+
+import java.util.ArrayList;
+
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+
+
+public class MazeBuilderEller extends MazeBuilder {
+	
+	int[] curRow;  //the current row that the algorithm is operating on
+	Hashtable<Integer, Integer> sets = new Hashtable<Integer, Integer>(); //a hashtable with the cell value as a key, and the "set number" 
+													 //as a value.
+	int[][] cellValArray; //an array with unique values that will mirror the cell object array
+	
+	
+	
+	//Random rand = new Random();
+	
+	int rowNum = 0; //THE ROW NUMBER WE ARE AT
+	
+	public MazeBuilderEller() {
+		
+		super();
+		
+		System.out.println("MazeBuilderPrim uses Eller's algorithm to generate maze.");
+	}
+
+	public MazeBuilderEller(boolean deterministic) {
+		super(deterministic);
+		System.out.println("MazeBuilderPrim uses Eller's algorithm to generate maze.");
+		
+	}
+	
+	
+
+	@Override
+	protected void generatePathways() {
+		
+		this.curRow = new int[this.maze.mazew]; //makes a blank array of size width
+		this.cellValArray = new int[this.height][this.width];
+		populateCellValArray(); //fills cellValArray with sequential values
+		
+		while(rowNum < this.height - 1){
+			this.setCurRow(rowNum);
+			int[] cur = getCurRow();
+			this.generateSets(cur); // puts the unique set values into the hashtable
+			this.setStrings();
+			randJoin(cur, sets); //randomly join adjacent cells if they are not in the same set
+			this.setStrings();
+			
+			//Randomly determine vertical connections, with at least 1 per set
+			
+			//need to get each unique set in curRow
+			ArrayList<Integer> setIDs = new ArrayList<Integer>();
+			for(int i = 0; i < curRow.length; i++){
+				int refSetID = sets.get(curRow[i]);
+				if(!(setIDs.contains(refSetID)) ){
+					setIDs.add(refSetID);
+				}
+				
+			}
+			
+			//Randomly determine vertical connections, with at least 1 per set
+			for(int j = 0; j < setIDs.size(); j++){
+				this.verticalConnect(setIDs.get(j));
+				this.setStrings();
+			}
+			
+			rowNum++; //increment row up one to get ready for next loop
+			
+		}
+		this.setCurRow(rowNum);
+		this.generateSets(curRow); // puts the unique set values into the hashtable
+		this.setStrings();
+		this.lastRow();
+		this.setStrings();
+		
+		
+	}
+
+	
+	/**
+	 * sets and returns the curRow
+	 * @param cellRow the row from Cells that is being inspected
+	 * @return int[] with values of the row from cells array
+	 */
+	protected void setCurRow(int cellRow){
+		for(int i = 0; i < width; i++){
+			curRow[i] = cellValArray[cellRow][i];
+		}
+	}
+	
+	
+	protected int[] getCurRow(){
+		return curRow;
+	}
+	
+	
+	protected void randJoin(int[] row, Hashtable<Integer, Integer> sets){
+	
+		boolean sameSet;
+		for(int i = 0; i < row.length; i++){
+			if(i + 1 < row.length){
+				sameSet = this.areSameSet(row[i], row[i + 1]); //tests if adjacent cells are part of same set
+				if(!sameSet){
+					//0 = join, 1 = don't join
+					int join = this.random.nextIntWithinInterval(0, 1);
+					if(join == 0){
+						this.cells.deleteWall(i, this.rowNum, 1, 0); //deletes wall to the right
+						//this.cells.deleteWall(x, y, dx, dy); <-- for quick debugging reference
+						
+						//add them to the same set
+						int refCell = row[i];
+						int adjCell = row[i+1];
+						this.joinSets(refCell, adjCell);
+					}
+				}
+			}
+			//cell at end of row
+			else{ 
+				sameSet = this.areSameSet(row[i], row[i-1]);
+				if(!sameSet){
+					//0 = join, 1 = don't join
+					int join = this.random.nextIntWithinInterval(0, 1);
+					if(join == 0){
+						this.cells.deleteWall(i, this.rowNum, -1, 0); //deletes wall to the left
+						//this.cells.deleteWall(x, y, dx, dy); <-- for quick debugging reference
+						
+						//add them to the same set
+						int refCell = row[i];
+						int adjCell = row[i - 1];
+						this.joinSets(refCell, adjCell);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Randomly determine vertical connections, with at least one per set. Called on a set by set basis
+	 */
+	private void verticalConnect(int setID){
+
+		int maxNumConnects = getNumCellsSet(setID); //gives us the maximum number of connections
+		
+		//chooses a random number of connections, with bottom limit of 1
+		//int numConnects = rand.nextInt(maxNumConnects) + 1;
+		//int numConnects = this.random.nextIntWithinInterval(1, maxNumConnects);
+		int numConnects = 1;
+		
+		int[] nextRow = new int[this.width];
+		for(int i = 0; i < this.width; i ++){
+			nextRow[i] = this.cellValArray[rowNum +1][i]; //throws array out of bounds on last 
+		}
+		
+		
+		//find upper and lower index bounds of set in row
+		//iterate of curRow, find key(index) that equals setID, keep going until it no longer does, return upper and lower
+		int lowBound = 0;
+		int upBound = 0;
+		for(int j = 0; j< width ; j++){
+			if(sets.get(curRow[j]) == setID){
+				lowBound = j;
+				//while((sets.get(curRow[j + 1]) == setID) && (j + 1) < width){
+				//	j++;
+				//}
+				if(j + 1 < width){
+					if(sets.get(curRow[j + 1]) == setID ){
+						j++;
+					}
+				}
+				upBound = j ;
+				break;
+			}
+		}
+		
+		//randomly chooses numConnects indices between lower and upper bounds
+		//int[] randomNdxs = new int[numConnects];
+		ArrayList<Integer> randomNdxs = new ArrayList<Integer>();
+		for(int i = 0; i < numConnects; i++){
+			//randomNdxs[i] = rand.nextInt((upBound - lowBound) + 1) + lowBound;
+			int theRandomNdx = this.random.nextIntWithinInterval(lowBound, upBound);
+			if(!(randomNdxs.contains(theRandomNdx))){
+				randomNdxs.add(theRandomNdx);
+			}
+			
+		}
+		
+		//need to get cells that were randomly chosen between upper and lower bounds using randomNdxs and 
+		//delete wall below it and join the cell to the sets
+		for(int i = 0; i< randomNdxs.size(); i++){
+			
+			//the randomly chosen cell within the boundary!!
+			int refCell = curRow[randomNdxs.get(i)];
+			//int southCell = this.cells.getValueOfCell((rowNum + 1), j ); //cell below refCell
+			int southCell = this.cellValArray[rowNum + 1][randomNdxs.get(i)];
+			
+			//put southCell into the set of refCell's set
+			int refCellSet = sets.get(refCell);
+			sets.put(southCell, refCellSet);
+			
+			//delete wall below refCell-- randNdxs.get(j) is the index of the randomly chosen cell and -1 specifies the one below it
+			//this.cells.deleteWall(this.rowNum, randomNdxs.get(i), 0, -1);
+			this.cells.deleteWall(randomNdxs.get(i), this.rowNum, 0, 1);
+		}	
+	}
+	
+	/**
+	 * same as randJoin() minus the randomness
+	 */
+	private void lastRow(){
+		
+		boolean sameSet;
+		for(int i = 0; i < curRow.length; i++){
+			if(i + 1 < curRow.length){
+				sameSet = this.areSameSet(curRow[i], curRow[i + 1]); //tests if adjacent cells are part of same set
+				if(!sameSet){
+					
+					this.cells.deleteWall(i, this.rowNum, 1, 0); //deletes wall to the right
+					//this.cells.deleteWall(x, y, dx, dy); <-- for quick debugging reference
+					
+					//add them to the same set
+					int refCell = curRow[i];
+					int adjCell = curRow[i+1];
+					this.joinSets(refCell, adjCell);
+					
+				}
+			}
+			//cell at end of row
+			else{ 
+				sameSet = this.areSameSet(curRow[i], curRow[i-1]);
+				if(!sameSet){
+					
+					this.cells.deleteWall(i, this.rowNum, -1, 0); //deletes wall to the left
+					//this.cells.deleteWall(x, y, dx, dy); <-- for quick debugging reference
+					
+					//add them to the same set
+					int refCell = curRow[i];
+					int adjCell = curRow[i - 1];
+					this.joinSets(refCell, adjCell);
+					
+				}
+			}
+		}
+	}
+	
+	/**
+	 * merges sets of cell2 into cell1
+	 * @param cell1
+	 * @param cell2
+	 */
+	private void joinSets(int cell1, int cell2){
+		//cell1 is refCell,
+		//cell2 is adjCell
+		int setOfRefCell = sets.get(cell1);
+		
+		//get all the other cells that are in same set as cell2
+		int setOfAdjCell = sets.get(cell2);
+		ArrayList<Integer> allCells = new ArrayList<Integer>();
+		for(int i = 0; i < rowNum; i++){
+			for(int j = 0; j < width; j++){
+				int tempSet = sets.get(this.cellValArray[i][j]); //gets the set of cell i,j
+				//check if same set as adjCell
+				if(setOfAdjCell == tempSet){
+					allCells.add(this.cellValArray[i][j]);
+				}
+			}
+		}
+		
+		//want to make all the cell in allCells same set as refCell
+		for(int x = 0; x < allCells.size(); x++){
+			sets.put(allCells.get(x), setOfRefCell);
+		}
+		
+		sets.put(cell2, setOfRefCell);
+	}
+	
+	/**
+	 * gets the number of cells in a set
+	 * @param set the set of interest
+	 * @return number of cells in a given set
+	 */
+	private int getNumCellsSet(int set){
+		
+		int setOfCellVal;
+		
+		int setCount = 0;
+		for(int i = 0; i < this.width; i++){
+			setOfCellVal = sets.get(curRow[i]);
+			if(setOfCellVal == set){
+				setCount++;
+			}
+		}
+		return setCount;
+		
+	}
+	
+	
+	/**
+	 * checks if two cells are part of the same set
+	 * @param cell1
+	 * @param cell2
+	 * @return
+	 */
+	private boolean areSameSet(int cell1, int cell2){
+		int set1 = sets.get(cell1); //the set that cell1 belongs too
+		int set2 = sets.get(cell2); //the set that cell2 belongs too
+		
+		if(set1 == set2){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Gets the number of sets in a row of cells. If the row is comprised only of 1 set, 1 is returned 
+	 * @param row the row being inspected
+	 * @return the number of sets in a row
+	 */
+	private int getNumSets(int[] row){
+		int num = 1; 
+		int refCell = row[0];
+		for(int i = 0; i < row.length; i++){
+			int otherCell = row[i];
+			if(!(this.areSameSet(refCell, otherCell))){
+				num++;
+			}
+			refCell = otherCell; 
+		}
+		return num;
+	}
+	
+	/**
+	 * generate a unique set number for each cell
+	 * @param row A row of cells
+	 */
+	private void generateSets(int[] row){
+		
+		for(int i = 0; i < row.length; i++){
+			
+			int num = cellValArray[rowNum][i];
+			if(!sets.containsKey(row[i])){
+				sets.put(row[i], num);
+			}
+			
+		}
+	}
+	
+	
+	
+	/**
+	 * gets specified number of random indices of a whole ROW
+	 * @param num number of random indices to compute
+	 * @return ArrayList of integers
+	 */
+	private ArrayList<Integer> getRandomIndices(int num){
+		ArrayList<Integer> randNdxs = new ArrayList<Integer>();
+		for(int i = 0; i < num; i++){
+			//int myRand = rand.nextInt(width); //what if it chooses an ndx thats already in there?
+			int myRand = this.random.nextIntWithinInterval(0, width -1);
+			//checks to see if an index is already in the array
+			
+			if(! randNdxs.contains(myRand) ){ //POSSIBLE ERROR
+				randNdxs.add(myRand);
+			}
+		}
+		return randNdxs;
+	}
+	
+	private void populateCellValArray(){
+		int num = 0;
+		// (i,j) = row, column
+		//width is number of colums, height is number of rows
+		for(int i = 0; i < height; i++){
+			for(int j = 0; j < width; j++){
+				this.cellValArray[i][j] = num;
+				num++;
+			}
+		}
+	}
+	
+	private void setStrings(){
+		for(int i = 0; i < this.height; i++){
+			System.out.println();
+			for(int j = 0; j< this.width; j++){
+				System.out.print(sets.get(cellValArray[i][j]) + "  " );
+				
+			}
+		}
+		System.out.println();
+		System.out.println();
+		
+	}
+	
+}

@@ -1,0 +1,118 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+public class SimplePuzzleState implements PuzzleState {
+	
+	private int[] puzzle; // a parameter to store the values of the puzzle
+	private PuzzleState parent; // a parameter that will store the parent of a puzzle
+	
+	// constructors
+	public SimplePuzzleState() {
+		puzzle = null;
+		parent = null;
+	}
+
+	@Override
+	public void setState(int[] gameState) 
+		/** Allows to configure the puzzle state to a particular game state. 
+		 * The state is provided as an array of integer. For instance, an 
+		 * one dimensional integer array {0,1,3,2} represents a state of 2x2 
+		 * puzzle with the first row carrying values 0 and 1, the second row 
+		 * carrying values 3 and 2.
+		 * @parameter gameState Provides a value for each tile in the current state of the game.
+		 */
+	{
+		this.puzzle = gameState; //Not sure about this line, will it be correct
+		// length? will it be an array? 
+		
+	}
+
+	@Override
+	public int[] getState() {
+		/** Get the current puzzle state in a single dimensional array 
+		 * (i.e. {0,1,3,2} for 2x2 puzzle). Blank tile is represented as 0. 
+		 * The coding goes by rows, for the example the top row contains 
+		 * values 0 and 1 from left to right. This method is symmetric to 
+		 * setState and returns an array of same content that was assigned 
+		 * with the setState method.
+		 * @return the gamestate set in setState
+		 */
+		return puzzle;
+	}
+
+	@Override
+	public PuzzleState getParent() {
+		/**Get the parent state which was previously set with the setParentState
+		 *  method. The parent state is useful if one wants to represent that a 
+		 *  puzzle state A moves to puzzle state B with a particular move operation. 
+		 *  For this example B.getParentState() returns A. Obtaining A is useful 
+		 *  to extract a path from a starting state to a final state once the 
+		 *  final state is reached.
+		 *  @return Returns the parent of the current state.
+		 */
+		return this.parent;
+	}
+
+	@Override
+	public void setParent(PuzzleState parentState) {
+		/** Sets the parent state.
+		 * @parameter parentState
+		 */
+		this.parent = parentState;	
+
+	}
+
+	@Override
+	public void setOperation(Operation op) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Operation getOperation() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setDistance(int distance) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int getDistance() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean equals(PuzzleState other) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public PuzzleState moveUp() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveDown() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveLeft() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveRight() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

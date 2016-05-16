@@ -1,0 +1,67 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/welcome_message"
+        android:textSize = "24sp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/welcome_message" />
+
+    <TextView
+        android:id="@+id/spinner_generation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/welcome_message"
+        android:layout_marginTop="10dp"
+        android:hint="@string/spinner_generation" />
+
+    <Spinner
+        android:id="@+id/generation_options_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/spinner_generation"
+        android:layout_marginTop="0dp" />
+
+    <TextView
+        android:id="@+id/seekbar_skill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/generation_options_spinner"
+        android:layout_marginTop="10dp"
+        android:hint="@string/seekbar_skill" />
+
+    <SeekBar
+        android:id="@+id/seekBar_difficulty"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekbar_skill"
+        android:layout_marginTop="26dp"
+        android:max="15"
+        android:text = "@string/seekbar_skill" />
+
+    <TextView
+        android:id="@+id/textView_seekBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/seekBar_difficulty"
+        android:layout_marginLeft="29dp"
+        android:layout_marginTop="14dp" />
+    <Button
+        android:id="@+id/button_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_seekBar"
+        android:layout_centerHorizontal="true"
+        android:text="@string/start_button"
+        android:onClick="startGenerating" />
+
+</RelativeLayout>

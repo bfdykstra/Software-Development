@@ -1,0 +1,642 @@
+package falstad;
+
+
+import java.util.ArrayList;
+
+public class BasicRobot implements Robot {
+	
+	float battery = 2500; //holds how much battery is left in the robot
+	public int numSteps = 0; //the total number of steps taken
+	public Maze maze; //the maze that the robot is operating in
+	boolean stopped ;
+	
+	
+
+	public BasicRobot() {
+		
+		
+	}
+	
+	public int getNumSteps(){
+		return this.numSteps;
+	}
+
+	@Override
+	public void rotate(Turn turn) throws Exception {
+		
+		if(this.battery - 3 >= 0 && (turn == Turn.LEFT || turn == Turn.RIGHT)){
+			switch(turn){
+			case LEFT:
+				this.maze.rotate(1);
+				this.battery = this.battery - 3;
+				//System.out.println("turned left, now facing: " + maze.dx + " " + maze.dy);
+				break;
+			case RIGHT:
+				maze.rotate(-1);
+				this.battery = this.battery - 3;
+				//System.out.println("turned right, now facing: " + maze.dx + " " + maze.dy);
+				//this.maze.keyDown(108);
+				break;
+			
+			}
+			
+		} else if(this.battery - 6 >= 0 && turn == Turn.AROUND){
+			maze.rotate(1);
+			maze.rotate(1);
+			this.battery = this.battery - 6;
+			
+		}else{
+			System.out.println("Battery went below 0; not allowed");
+			stopped = true;
+			maze.state = Constants.STATE_LOST;
+			maze.notifyViewerRedraw();
+			throw new Exception();
+			
+		}
+	}
+
+	@Override
+	public void move(int distance) throws Exception {
+		
+		for(int i = 0; i < distance; i++){
+			//checks to see if forward direction has a wall in front of it
+			boolean canGo = maze.checkMove(1);
+			if((battery - 5 > 0) && canGo){
+				stopped = false;
+				battery = battery -5;
+				numSteps++;
+				this.maze.walk(1); //won't move backwards which would be -1
+			}
+			else{
+				stopped = true;
+				maze.state = Constants.STATE_LOST;
+				maze.notifyViewerRedraw();
+				System.out.println("Moving would cause battery to go below 5. Current battery level: " + battery 
+						+ " or, cannot move this way");
+				throw new Exception();
+			}
+		}
+	}
+	
+	
+	/**
+	 * returns the direction relative to the robot of the location of walls
+	 * @param curDir
+	 * @return An ArrayList of directions 
+	 * @throws Exception 
+	 */
+	public ArrayList<Direction> sensor(int[] curDir) throws Exception{
+		
+		int[] EAST = {1, 0};
+		int[] WEST = {-1, 0};
+		int[] SOUTH = {0,-1};
+		int[] NORTH = {0, 1};
+		ArrayList<Direction> dirList = new ArrayList<Direction>();
+		if(battery - 1 >= 0){
+			if(this.arrayEquals(EAST, curDir) ){
+				battery = battery - 1;
+				//left
+				if(maze.mazecells.hasWallOnBottom(maze.px, maze.py)){
+					dirList.add(Direction.LEFT);
+				}
+				//right
+				if(maze.mazecells.hasWallOnTop(maze.px, maze.py)){
+					dirList.add(Direction.RIGHT);
+				}
+				//forward
+				if(maze.mazecells.hasWallOnRight(maze.px, maze.py)){
+					dirList.add(Direction.FORWARD);
+				}
+				return dirList;
+			}
+			else if(this.arrayEquals(WEST, curDir) ){
+				battery = battery - 1;
+				//left
+				if(maze.mazecells.hasWallOnTop(maze.px, maze.py)){
+					dirList.add(Direction.LEFT);
+				}
+				//right
+				else if(maze.mazecells.hasWallOnBottom(maze.px, maze.py)){
+					dirList.add(Direction.RIGHT);
+				}
+				//front
+				else if(maze.mazecells.hasWallOnLeft(maze.px, maze.py)){
+					dirList.add(Direction.FORWARD);
+				}
+				return dirList;
+			}
+			else if(this.arrayEquals(SOUTH, curDir)){
+				battery = battery - 1;
+				//left
+				if(maze.mazecells.hasWallOnRight(maze.px, maze.py)){
+					dirList.add(Direction.RIGHT);
+				}
+				//right
+				else if(maze.mazecells.hasWallOnLeft(maze.px, maze.py)){
+					dirList.add(Direction.LEFT);
+				}
+				//front
+				else if(maze.mazecells.hasWallOnTop(maze.px, maze.py)){
+					dirList.add(Direction.FORWARD);
+				}
+				return dirList;
+			}
+			else if(this.arrayEquals(NORTH, curDir)){
+				battery = battery - 1;
+				//left
+				if(maze.mazecells.hasWallOnLeft(maze.px, maze.py)){
+					dirList.add(Direction.LEFT);
+				}
+				//right
+				else if(maze.mazecells.hasWallOnRight(maze.px, maze.py)){
+					dirList.add(Direction.RIGHT);
+				}
+				//front
+				else if(maze.mazecells.hasWallOnBottom(maze.px, maze.py)){
+					dirList.add(Direction.FORWARD);
+				}
+				return dirList;
+			}
+		}
+		else{
+			stopped = true;
+			//this.maze.notifyViewerRedraw();
+			System.out.println("Sensing would cause battery to go below 0. Current battery level: " + battery);
+			throw new Exception();
+		}
+		
+		
+		return null;
+		
+	}
+	
+	public void resetNumSteps(){
+		this.numSteps = 0;
+	}
+	@Override
+	public int[] getCurrentPosition() {
+		
+			int[] curPosition = {this.maze.px, this.maze.py};
+			return curPosition;
+	}
+
+	@Override
+	public void setMaze(Maze maze) {
+		
+		this.maze = maze;
+
+	}
+
+	@Override
+	public boolean isAtGoal() {
+	
+		return maze.mazecells.isExitPosition(maze.px, maze.py);
+		/*
+		if(this.maze.mazecells.isExitPosition(maze.px, maze.py)){
+			return true;
+		}
+		return false;
+		*/
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+		int[] curDir = this.getCurrentDirection();
+		int[] curPos = this.getCurrentPosition();
+		int[] EAST = {1, 0};
+		int[] WEST = {-1, 0};
+		int[] SOUTH = {0,-1};
+		int[] NORTH = {0, 1};
+		boolean canSee = false;
+		
+		if(this.arrayEquals(curDir, EAST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				//boolean canSee = false;
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, 1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX + 1, tempY)){
+						canSee = true;
+					}
+					tempX ++;
+				}
+				return canSee;
+				
+			case RIGHT:
+				//tracks downward
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, -1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY - 1)){
+						canSee = true;
+					}
+					tempY--;
+				}
+				return canSee;
+				
+			case LEFT:
+				//tracks up
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, 1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY + 1)){
+						canSee = true;
+					}
+					tempY++;
+				}
+				return canSee;
+				
+			case BACKWARD:
+				//tracks down
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, -1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX - 1, tempY)){
+						canSee = true;
+					}
+					tempX --;
+				}
+				return canSee;
+				
+			}
+		}else if(this.arrayEquals(curDir, WEST)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			canSee = false;
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, -1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX - 1, tempY)){
+						canSee = true;
+					}
+					tempX --;
+				}
+				return canSee;
+				
+			case RIGHT:
+				//tracks downward
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, 1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY + 1)){
+						canSee = true;
+					}
+					tempY++;
+				}
+				return canSee;
+				
+			case LEFT:
+				//tracks up
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, -1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY - 1)){
+						canSee = true;
+					}
+					tempY--;
+				}
+				return canSee;
+				
+			case BACKWARD:
+				//tracks down
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, 1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX + 1, tempY)){
+						canSee = true;
+					}
+					tempX ++;
+				}
+				return canSee;
+				
+			}
+		}else if(this.arrayEquals(curDir, SOUTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, -1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY - 1)){
+						canSee = true;
+					}
+					tempY--;
+				}
+				return canSee;
+				
+			case RIGHT:
+				//tracks downward
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, -1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX - 1, tempY)){
+						canSee = true;
+					}
+					tempX --;
+				}
+				return canSee;
+				
+			case LEFT:
+				//tracks up
+				while((!canSee) && (maze.mazecells.canGo(tempX, tempY, 1, 0)) ){
+					if(this.maze.mazecells.isExitPosition(tempX + 1, tempY)){
+						canSee = true;
+					}
+					tempX ++;
+				}
+				return canSee;
+				
+			case BACKWARD:
+				//tracks down
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, 1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY + 1)){
+						canSee = true;
+					}
+					tempY++;
+				}
+				return canSee;
+				
+			}
+			
+		}else if(this.arrayEquals(curDir, NORTH)){
+			int tempX = curPos[0];
+			int tempY = curPos[1];
+			
+			
+			switch(direction){
+			case FORWARD:
+				//tracks forward
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, 1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY + 1)){
+						canSee = true;
+					}
+					tempY++;
+				}
+				return canSee;
+				
+			case RIGHT:
+				//tracks downward
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 1, 0))){
+					if(this.maze.mazecells.isExitPosition(tempX + 1, tempY)){
+						canSee = true;
+					}
+					tempX ++;
+				}
+				return canSee;
+				
+			case LEFT:
+				//tracks up
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, -1, 0))){
+					if(this.maze.mazecells.isExitPosition(tempX - 1, tempY)){
+						canSee = true;
+					}
+					tempX --;
+				}
+				return canSee;
+				
+			case BACKWARD:
+				//tracks down
+				while( (!canSee) && (maze.mazecells.canGo(tempX, tempY, 0, -1))){
+					if(this.maze.mazecells.isExitPosition(tempX, tempY - 1)){
+						canSee = true;
+					}
+					tempY--;
+				}
+				return canSee;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		
+		return maze.mazecells.isInRoom(maze.px, maze.py);
+		
+		/*
+		if(this.maze.mazecells.isInRoom(maze.px, maze.py)){
+			return true;
+		}
+		return false;
+		*/
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		
+		return true;
+	}
+
+	@Override
+	public int[] getCurrentDirection() {
+		
+		int[] curDir = {this.maze.dx, this.maze.dy};
+		return curDir;
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		
+		return this.battery;
+		
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		
+		this.battery = level;
+
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		
+		return 12;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		
+		return 5;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		
+		return stopped;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) {
+		
+		int[] curDir = this.getCurrentDirection();
+		int[] curPos = this.getCurrentPosition();
+		int[] EAST = {1, 0};
+		int[] WEST = {-1, 0};
+		int[] SOUTH = {0,-1};
+		int[] NORTH = {0, 1};
+		int dist = 0;
+		
+		if(battery - 1 >= 0){
+			battery = battery - 1;
+			if(this.arrayEquals(curDir, EAST)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+						tempX++;
+						dist++;
+					}
+					return dist;
+				case RIGHT:
+					//tracks downward
+					while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+						tempY--;
+						dist++;
+					}
+					return dist;
+				case LEFT:
+					//tracks up
+					while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+						tempY++;
+						dist++;
+					}
+					return dist;
+				case BACKWARD:
+					//tracks down
+					while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+						tempX--;
+						dist++;
+					}
+					return dist;
+					
+				}
+			}else if(this.arrayEquals(curDir, WEST)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+						tempX--;
+						dist++;
+					}
+					return dist;
+				case RIGHT:
+					//tracks downward
+					while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+						tempY++;
+						dist++;
+					}
+					return dist;
+				case LEFT:
+					//tracks up
+					while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+						tempY--;
+						dist++;
+					}
+					return dist; //may have to be dist -1
+				case BACKWARD:
+					//tracks down
+					while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+						tempX++;
+						dist++;
+					}
+					return dist;
+					
+				}
+			}else if(this.arrayEquals(curDir, SOUTH)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+						tempY--;
+						dist++;
+					}
+					return dist;
+				case RIGHT:
+					//tracks downward
+					while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+						tempX--;
+						dist++;
+					}
+					return dist;
+				case LEFT:
+					//tracks up
+					while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+						tempX++;
+						dist++;
+					}
+					return dist; //may have to be dist -1
+				case BACKWARD:
+					//tracks down
+					while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+						tempY++;
+						dist++;
+					}
+					return dist;
+					
+				}
+				
+			}else if(this.arrayEquals(curDir, NORTH)){
+				int tempX = curPos[0];
+				int tempY = curPos[1];
+				switch(direction){
+				case FORWARD:
+					//tracks forward
+					while(this.maze.mazecells.hasNoWallOnBottom(tempX, tempY)){
+						tempY++;
+						dist++;
+					}
+					return dist;
+				case RIGHT:
+					//tracks downward
+					while(this.maze.mazecells.hasNoWallOnRight(tempX, tempY)){
+						tempX++;
+						dist++;
+					}
+					return dist;
+				case LEFT:
+					//tracks up
+					while(this.maze.mazecells.hasNoWallOnLeft(tempX, tempY)){
+						tempX--;
+						dist++;
+					}
+					return dist; //may have to be dist -1
+				case BACKWARD:
+					//tracks down
+					while(this.maze.mazecells.hasNoWallOnTop(tempX, tempY)){
+						tempY--;
+						dist++;
+					}
+					return dist;
+				}
+			}
+		}
+		else{
+			stopped = true;
+			//this.maze.notifyViewerRedraw();
+			System.out.println("Sensing would cause battery to go below 0. Current battery level: " + battery);
+			
+		}
+		
+		return 0;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		return true;
+	}
+	
+	/**
+	 * tests whether two arrays are equal
+	 * @param a1
+	 * @param a2
+	 * @return
+	 */
+	protected boolean arrayEquals(int[] a1, int[] a2){
+		if(a1.length != a2.length){
+			return false;
+		}
+		for(int i = 0; i < a1.length; i++){
+			if( a1[i] != a2[i]){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+}

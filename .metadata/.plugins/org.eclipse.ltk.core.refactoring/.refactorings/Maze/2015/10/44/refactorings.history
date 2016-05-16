@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring clone="true" comment="Infer generic type arguments on &apos;Maze&apos;&#x0A;- Original project: &apos;Maze&apos;&#x0A;- Original elements:&#x0A;     falstad.MazeView.java&#x0A;- Assume clone() returns an instance of the receiver type&#x0A;- Leave unconstrained type arguments raw" description="Infer generic type arguments" element1="/src&lt;falstad{MazeView.java" flags="6" id="org.eclipse.jdt.ui.infer.typearguments" leave="true" stamp="1446316771646" version="1.0"/>
+</session>

@@ -1,0 +1,14 @@
+package falstad;
+
+public class MazeBuilderStub extends MazeBuilder {
+
+	public MazeBuilderStub() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public MazeBuilderStub(boolean deterministic) {
+		super(deterministic);
+		// TODO Auto-generated constructor stub
+	}
+
+}

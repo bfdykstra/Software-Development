@@ -1,0 +1,97 @@
+package falstad;
+
+import falstad.Robot.Turn;
+
+public class ManualDriver implements RobotDriver {
+	
+	Robot robot;
+	int width;
+	int height;
+	Distance distance;
+	int numSteps = 0;
+	
+
+	public ManualDriver() {
+		
+	}
+
+	@Override
+	public void setRobot(Robot r) {
+		this.robot = r;
+		
+	}
+
+	@Override
+	public void setDimensions(int width, int height) {
+		
+		this.width = width;
+		this.height = height;
+
+	}
+
+	@Override
+	public void setDistance(Distance distance) {
+		this.distance = distance;
+
+	}
+
+	@Override
+	public boolean drive2Exit() throws Exception {
+		
+		return false;
+	}
+
+	@Override
+	public float getEnergyConsumption() {
+		float consumption = 2500 - robot.getBatteryLevel();
+		return consumption;
+	}
+
+	@Override
+	public int getPathLength() {
+		int numSteps = this.robot.getNumSteps();
+		return numSteps;
+	}
+	
+	/**
+	 * called in keyDown() of maze for certain keys, only the arrow keys specifically
+	 */
+	public void passToRobot(int key){
+		System.out.println("In passToRobot, using this key: " + key);
+		switch(key){
+		case 104:
+			try {
+				robot.rotate(Turn.LEFT);
+				break;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		case 108:
+			try {
+				robot.rotate(Turn.RIGHT);
+				break;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		case 107:
+			try {
+				
+				robot.move(1);
+				break;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		case 106:
+			try{
+				robot.rotate(Turn.AROUND);
+				break;
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+
+}

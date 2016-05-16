@@ -1,0 +1,242 @@
+package edu.wm.cs.cs301.BenDykstra.ui;
+
+//import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import edu.wm.cs.cs301.BenDykstra.falstad.BasicRobot;
+import edu.wm.cs.cs301.BenDykstra.falstad.Maze;
+import edu.wm.cs.cs301.BenDykstra.falstad.MazeFileReader;
+import edu.wm.cs.cs301.BenDykstra.falstad.Robot;
+import edu.wm.cs.cs301.BenDykstra.falstad.Distance;
+import edu.wm.cs.cs301.BenDykstra.falstad.GraphicsWrapper;
+
+@SuppressLint("NewApi")
+public class GeneratingActivity extends AppCompatActivity {
+	public final static String THE_DRIVER = "edu.wm.cs.cs301.BenDykstra.ui.DRIVER";
+	public final static String SHOW_MAZE = "edu.wm.cs.cs301.BenDykstra.ui.SHOW_MAZE";
+	public final static String SHOW_VISIBLE = "edu.wm.cs.cs301.BenDykstra.ui.VISIBLE";
+	public final static String SHOW_SOLUTION = "edu.wm.cs.cs301.BenDykstra.ui.SOLUTION";
+	public final static String THE_MAZE = "edu.wm.cs.cs301.BenDykstra.ui.THE_MAZE";
+	
+	Handler handler = new Handler();
+	
+	ProgressBar progressBar;
+	TextView textView;
+	
+	int progressStatus = 0;
+	boolean progressDone = false;
+	public Button playButton;
+	Maze maze;
+	GraphicsWrapper gw;
+	
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.activity_generating);
+		
+		//the intent from title screen
+		Intent intent = getIntent();
+		
+		gw = (GraphicsWrapper) findViewById(R.id.GraphicsWrapper);
+		
+		//get difficulty and algorithm passed in
+		Bundle bundle = intent.getExtras();
+		int alg = bundle.getInt(AMazeActivity.THE_ALG);
+		final int diff = bundle.getInt(AMazeActivity.THE_DIFF);
+		//String diff = intent.getStringExtra(AMazeActivity.THE_DIFF);
+		//String alg = intent.getStringExtra(AMazeActivity.THE_ALG);
+		//PROGRESS BAR STUFF//
+		progressBar = (ProgressBar) findViewById(R.id.maze_generating_progress);
+		progressBar.setIndeterminate(false);
+		textView = (TextView) findViewById(R.id.progress_bar_text);
+		
+		playButton = (Button) findViewById(R.id.play_button);
+
+		
+		
+		this.init(diff, alg);
+		
+		
+		
+		
+		
+		//SPINNER STUFF//
+		Spinner spinner = (Spinner) findViewById(R.id.driver_options_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		        R.array.driver_algorithm_spinner, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		spinner.setAdapter(adapter);
+	}
+	
+	
+	public void init(int dif, int alg){
+		//textView.setText("Generating the maze: " +  maze.getPercentDone());
+		//initialize maze and then build it
+		Robot r = new BasicRobot();
+		maze = ((Maze) this.getApplicationContext()); //check this http://stackoverflow.com/questions/2906925/how-do-i-pass-an-object-from-one-activity-to-another-on-android
+		// could also be this.getApplicationContext();
+		if(alg == 3){ //from a file
+			//load the file 
+			Context context = getApplicationContext();
+			File file = context.getFileStreamPath("level" + AMazeActivity.difficulty);
+			boolean x = file.exists();
+			if(file.exists()){
+				try {
+					maze.setMethod(3);
+					FileInputStream fs = context.openFileInput("level" + AMazeActivity.difficulty);
+					MazeFileReader mfr = new MazeFileReader(fs);
+					maze.mazeh = mfr.getHeight() ;
+					maze.mazew = mfr.getWidth() ;
+					Distance d = new Distance(mfr.getDistances()) ;
+					maze.init();
+					maze.setRobot(r);
+					maze.setGenAct(this);
+					maze.newMaze(mfr.getRootNode(), mfr.getCells(), d, mfr.getStartX(), mfr.getStartY());
+					maze.mazebuilder.onPostExecute(0);
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					//if user tries to load a file that is not saved, just generates a regular one
+					try {
+						maze.init();
+						maze.setRobot(r);
+						maze.setGenAct(this);
+						maze.setMethod(0);
+						maze.build(dif);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					e.printStackTrace();
+				}
+			}else{
+				maze.init();
+				maze.setRobot(r);
+				maze.setGenAct(this);
+				maze.setMethod(0);
+				try {
+					maze.build(dif);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}else{
+			maze.setMethod(alg);
+			maze.setRobot(r);
+			maze.setGenAct(this);
+			maze.init();
+			
+			try {
+				maze.build(dif);
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
+	}
+	
+	public void setText(int percentDone){
+		
+		textView.setText("Generating maze: " + percentDone + "%");
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.generating, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	public void startPlay(View view){
+		Intent intent = new Intent(this, PlayActivity.class);
+		
+		//Driver
+		Spinner spinner = (Spinner) findViewById(R.id.driver_options_spinner);
+		String driver = spinner.getSelectedItem().toString();
+		intent.putExtra(THE_DRIVER, driver);
+		
+		//check for show_maze
+		CheckBox maze_box = (CheckBox) findViewById(R.id.show_maze_box);
+		intent.putExtra(SHOW_MAZE, maze_box.isChecked());
+		Boolean maze = false;
+		if(maze_box.isChecked()) maze = true;
+		
+		
+		//check for show visible
+		CheckBox show_visible_box = (CheckBox) findViewById(R.id.show_visible_box);
+		intent.putExtra(SHOW_VISIBLE, show_visible_box.isChecked());
+		Boolean visible = false;
+		if(show_visible_box.isChecked()) visible = true;
+		
+		//check box for show_solution
+		CheckBox solution_box = (CheckBox) findViewById(R.id.show_solution_box);
+		Boolean solution = false;
+		if(solution_box.isChecked()){
+			solution = true;
+		}
+		intent.putExtra(SHOW_SOLUTION, solution_box.isChecked());
+		
+		Log.v("Driver: ", driver);
+		Log.v("Show maze: ", maze.toString());
+		Log.v("Show visible: ", visible.toString());
+		Log.v("Show solution: ", solution.toString());
+		
+		
+		this.startActivity(intent);
+	}
+
+
+
+
+	public Handler getProgressBarHandler() {
+		// TODO Auto-generated method stub
+		return this.handler;
+	}
+	
+	public ProgressBar getProgressBar(){
+		return this.progressBar;
+	}
+}

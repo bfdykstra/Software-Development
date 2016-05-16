@@ -1,0 +1,47 @@
+package falstad;
+
+public class MazeBuilderEller extends MazeBuilder {
+
+	public MazeBuilderEller() {
+		// TODO Auto-generated constructor stub
+		super();
+		System.out.println("MazeBuilderPrim uses Eller's algorithm to generate maze.");
+	}
+
+	public MazeBuilderEller(boolean deterministic) {
+		super(deterministic);
+		System.out.println("MazeBuilderPrim uses Eller's algorithm to generate maze.");
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	protected void generate() {
+		// TODO Auto-generated method stub
+		super.generate();
+	}
+
+	@Override
+	protected void generatePathways() {
+		// TODO Auto-generated method stub
+		super.generatePathways();
+	}
+
+	@Override
+	public void build(Maze mz, int w, int h, int roomct, int pc) {
+		// TODO Auto-generated method stub
+		super.build(mz, w, h, roomct, pc);
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		super.run();
+	}
+
+	@Override
+	public void interrupt() {
+		// TODO Auto-generated method stub
+		super.interrupt();
+	}
+
+}

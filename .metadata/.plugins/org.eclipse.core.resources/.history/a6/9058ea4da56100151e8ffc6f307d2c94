@@ -1,0 +1,120 @@
+package falstad;
+
+public class MazeBuilderStub extends MazeBuilder {
+	// Given input information: 
+	protected int width, height ; 	// width and height of maze, 
+	Maze maze; 				// reference to the maze that is constructed, results are returned by calling maze.newMaze(..)
+	private int rooms; 		// requested number of rooms in maze, a room is an area with no walls larger than a single cell
+	
+	
+	// Produced output information to create the new maze
+	// root, cells, dists, startx, starty
+	protected int startx, starty ; // starting position inside maze for entity to search for exit
+	// conventional encoding of maze as a 2 dimensional integer array encapsulated in the Cells class
+	// a single integer entry can hold information on walls, borders/bounds
+	protected Cells cells; // the internal representation of a maze as a matrix of cells
+	protected Distance dists ; // distance matrix that stores how far each position is away from the exit positino
+
+	// class internal local variables
+	protected SingleRandom random ; // random number stream, used to make randomized decisions, e.g for direction to go
+
+	Thread buildThread; // computations are performed in own separated thread with this.run()
+
+
+	public MazeBuilderStub(boolean deterministic) {
+		super(deterministic);
+		if (true == deterministic)
+		{
+			SingleRandom.setSeed(1);
+		}
+		random = SingleRandom.getRandom();
+	}
+
+	@Override
+	protected void generate() {
+		// generate paths in cells such that there is one strongly connected component
+		// i.e. between any two cells in the maze there is a path to get from one to the other
+		// the search algorithms starts at some random point
+		generatePathways(); 
+
+		final int[] remote = dists.computeDistances(cells) ;
+
+		// identify cell with the greatest distance
+		final int[] pos = dists.getStartPosition();
+		startx = pos[0] ;
+		starty = pos[1] ;
+
+		// make exit position at true exit in the cells data structure
+		cells.setExitPosition(remote[0], remote[1]);
+	}
+
+	@Override
+	protected void generatePathways() {
+		//2D array made using width and height of maze
+		int[][] origdirs = new int[width][height] ; 
+		
+		//sets random starting place
+		int x = random.nextIntWithinInterval(0, width-1) ;
+		int y = 0; 
+		final int firstx = x ; 
+		final int firsty = y ;
+		int dir = 0; 	 	
+		int origdir = dir; 	
+		
+		cells.setCellAsVisited(x, y); //marks cells as visited
+		
+		while (true) {
+			
+			//sets directions-- I think
+			int dx = Constants.DIRS_X[dir]; 
+			int dy = Constants.DIRS_Y[dir];
+			
+			//If cells cannot go to x+dx, y+dy, finds different direction to go.
+			if (!cells.canGo(x, y, dx, dy)) { 
+				dir = (dir+1) & 3; 
+				if (origdir == dir) { 
+					if (x == firstx && y == firsty)
+						break; //at beginning
+					
+					int odr = origdirs[x][y];
+					dx = Constants.DIRS_X[odr];
+					dy = Constants.DIRS_Y[odr];
+					
+					//subtract changes in x and y, reverses what was added
+					x -= dx;
+					y -= dy;
+					
+					//picks new random direction
+					origdir = dir = random.nextIntWithinInterval(0, 3);
+				}
+			} else {
+				//get rid of walls in front of cell
+				cells.deleteWall(x, y, dx, dy);
+				x += dx; //add dx and dy to cells, current cells are now the changed ones
+				y += dy;
+				cells.setCellAsVisited(x, y);
+				origdirs[x][y] = dir;
+				origdir = dir = random.nextIntWithinInterval(0, 3);
+			}
+		}
+	}
+	
+
+	public void build(MazeStub mz, int w, int h, int roomct, int pc) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		super.run();
+	}
+
+	@Override
+	public void interrupt() {
+		// TODO Auto-generated method stub
+		super.interrupt();
+	}
+
+}

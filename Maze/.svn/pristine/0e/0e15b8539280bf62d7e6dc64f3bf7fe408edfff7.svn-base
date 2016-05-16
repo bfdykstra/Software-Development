@@ -1,0 +1,33 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+public class MazeBuilderTest {
+	private int startx; //starting position x coordinate
+	private int starty; //starting postion y coordinate
+	private int mazew; //desired maze width
+	private int mazeh; //desired maze height
+	private Cells mazeCells; 
+	private Distance mazeDists;
+	
+	
+	public MazeBuilderTest(){
+		mazew = 4;
+		mazeh = 4; //4x4 maze for now WILL NEED TO CHANGE, not sure if correct
+		this.mazeCells = new Cells(mazew, mazeh);
+		this.mazeDists.computeDistances(mazeCells);
+		
+	}
+	@Test
+	public void test() {
+		MazeBuilder m1 = new MazeBuilder(true);
+		MazeStub mStub = new MazeStub(startx, starty, mazew, mazeh, mazeCells);
+		m1.build(mStub, mazeh, mazeh, 4); //room count arbitrarily set to 4
+		
+		
+		fail("Not yet implemented");
+	}
+
+}

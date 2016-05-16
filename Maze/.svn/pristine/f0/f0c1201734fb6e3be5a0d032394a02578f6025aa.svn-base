@@ -1,0 +1,52 @@
+package falstad;
+
+public class ManualDriver implements RobotDriver {
+	
+	Robot robot;
+	int width;
+	int height;
+	Distance distance;
+
+	public ManualDriver() {
+		
+	}
+
+	@Override
+	public void setRobot(Robot r) {
+		this.robot = r;
+		
+	}
+
+	@Override
+	public void setDimensions(int width, int height) {
+		
+		this.width = width;
+		this.height = height;
+
+	}
+
+	@Override
+	public void setDistance(Distance distance) {
+		this.distance = distance;
+
+	}
+
+	@Override
+	public boolean drive2Exit() throws Exception {
+		
+		return false;
+	}
+
+	@Override
+	public float getEnergyConsumption() {
+		float consumption = 2500 - robot.getBatteryLevel();
+		return consumption;
+	}
+
+	@Override
+	public int getPathLength() {
+		int numSteps = robot.getNumSteps();
+		return numSteps;
+	}
+
+}

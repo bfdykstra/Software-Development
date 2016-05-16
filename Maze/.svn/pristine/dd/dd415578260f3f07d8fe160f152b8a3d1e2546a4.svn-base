@@ -1,0 +1,62 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class MazeBuilderTest {
+	private int mazew; //desired maze width
+	private int mazeh; //desired maze height
+	MazeStub mazeStub; //// reference to the mazeStub that is constructed, results are returned by calling mazeStub.newMaze(..)
+	private Cells mazeCells; 
+	private Distance mazeDists;
+	
+	private int startx; //starting position x coordinate
+	private int starty; //starting postion y coordinate
+	
+	
+	
+	public MazeBuilderTest(){
+		mazew = 8;
+		mazeh = 8; //4x4 maze for now WILL NEED TO CHANGE, not sure if correct
+		/**
+		this.mazeCells = new Cells(mazew, mazeh);
+		mazeCells.initialize();
+		this.mazeDists = new Distance(mazew, mazeh);
+		  
+		 */
+		
+	}
+	
+	@Before
+	public void setUp(){
+		mazeStub = new MazeStub();
+		mazeStub.build(1); //this then calls Mazebuilder.build() which then calls init and initializes builder attributes
+	}
+	
+	@Test
+	public void configTest() {
+		//MazeBuilder m1 = new MazeBuilder(true);
+		assertNotNull(mazeStub.mazebuilder.cells);
+		assertNotNull(mazeStub.mazebuilder.dists);
+		assertNotNull(mazeStub.mazebuilder.height);
+		assertNotNull(mazeStub.mazebuilder.width);
+		assertNotNull(mazeStub.mazebuilder.startx);
+		assertNotNull(mazeStub.mazebuilder.starty);
+		
+		//we now have an initialized MazeBuilder object that we can do things too
+		//m1.run();
+		
+		
+	}
+	
+	@Test
+	public void startTest(){
+		//mazeStub.mazedists.computeDistances(mazeStub.mazecells);
+		int x = mazeStub.mazebuilder.startx;
+		int y = mazeStub.mazebuilder.starty;
+		assertTrue(mazeStub.mazebuilder.cells.isInRoom(x,y));
+	}
+
+}

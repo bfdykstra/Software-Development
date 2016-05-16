@@ -1,0 +1,350 @@
+package falstad;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+
+import org.junit.Test;
+
+import falstad.Robot.Direction;
+import falstad.Robot.Turn;
+
+public class BasicRobotTest {
+	BasicRobot myRobot; //robot that is being tested
+	
+	
+	public void setUp() throws InterruptedException{
+		SingleRandom.setSeed(17);
+		myRobot = new BasicRobot();
+		MazeApplication a = new MazeApplication("Eller");
+		a.repaint();
+		//0 = 48, 1 = 49
+		a.maze.keyDown(49);
+		a.maze.mazebuilder.buildThread.join();
+		
+		myRobot.setMaze(a.maze);
+	}
+
+	
+	@Test
+	public void testRotate() {
+		try {
+			setUp();
+		} catch (InterruptedException e1) {
+			
+			e1.printStackTrace();
+		}
+		try {
+			//Always facing east at start
+			int[] targetDir = myRobot.getCurrentDirection();
+			
+			myRobot.rotate(Turn.LEFT);
+			myRobot.rotate(Turn.RIGHT);
+			myRobot.rotate(Turn.AROUND);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.rotate(Turn.LEFT);
+			int[] newCurDir = myRobot.getCurrentDirection();
+			boolean areTheyEqual = myRobot.arrayEquals(targetDir, newCurDir);
+			assertTrue(areTheyEqual);
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Test
+	public void testMove() {
+		try {
+			setUp();
+		} catch (InterruptedException e1) {
+			
+			e1.printStackTrace();
+		}
+		
+		try {
+			myRobot.move(2); //brings up right to end of hall
+			myRobot.rotate(Turn.LEFT);
+			myRobot.move(1);
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Test
+	public void testSensor() {
+		try {
+			setUp();
+		} catch (InterruptedException e1) {
+			
+			e1.printStackTrace();
+		}
+		
+		ArrayList<Direction> expectedDir = new ArrayList<Direction>();
+		expectedDir.add(Direction.RIGHT);
+		
+		ArrayList<Direction> dirList = myRobot.sensor(myRobot.getCurrentDirection());
+		
+		if(!(dirList.contains(expectedDir.get(0)) )){
+			fail("dirList did not contain the expected directions.");
+		}
+		
+		
+		try {
+			myRobot.move(1); // puts robot forward one
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		ArrayList<Direction> newExpectedDir = new ArrayList<Direction>();
+		newExpectedDir.add(Direction.LEFT);
+		newExpectedDir.add(Direction.RIGHT);
+		
+		ArrayList<Direction> newDirList = myRobot.sensor(myRobot.getCurrentDirection());
+		
+		if(!(newDirList.contains(newExpectedDir.get(0)) && newDirList.contains(newExpectedDir.get(1))) ){
+			fail("dirList did not contain the expected directions.");
+		}
+		
+		try {
+			myRobot.move(1); // puts robot forward one
+			myRobot.rotate(Turn.LEFT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		ArrayList<Direction> dir = new ArrayList<Direction>();
+		dir.add(Direction.RIGHT);
+		
+		ArrayList<Direction> lastMove = myRobot.sensor(myRobot.getCurrentDirection());
+		
+		if(!(lastMove.contains(dir.get(0))) ){
+			fail("dirList did not contain the expected directions.");
+		}	
+	} 
+
+	@Test
+	public void testGetCurrentPosition() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		int[] curPos = myRobot.getCurrentPosition();
+		assertNotNull(curPos);
+		
+	}
+
+	@Test
+	public void testSetMaze() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		
+		//should have been set in setup()
+		assertNotNull(myRobot.maze);
+	}
+
+	
+	@Test
+	public void testCanSeeGoal() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		
+		try {
+			myRobot.move(2);
+			myRobot.rotate(Turn.AROUND);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		boolean canSeeForward = myRobot.canSeeGoal(Direction.FORWARD);
+		assertTrue(canSeeForward);
+		boolean canSeeBackward = myRobot.canSeeGoal(Direction.BACKWARD);
+		assertFalse(canSeeBackward);
+		boolean canSeeLeft = myRobot.canSeeGoal(Direction.LEFT);
+		assertFalse(canSeeLeft);
+		boolean canSeeRight = myRobot.canSeeGoal(Direction.RIGHT);
+		assertFalse(canSeeRight);
+		
+		
+	}
+
+	@Test
+	public void testIsInsideRoom() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		try {
+			myRobot.move(2);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.move(1);
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		assertTrue(myRobot.isInsideRoom());
+		
+	}
+
+
+	@Test
+	public void testGetEnergyForFullRotation() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		assertTrue(12 == myRobot.getEnergyForFullRotation());
+	}
+
+	@Test
+	public void testGetEnergyForStepForward() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		assertTrue(myRobot.getEnergyForStepForward() == 5);
+	}
+
+	@Test
+	public void testHasStopped() throws Exception {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		myRobot.move(2);
+		
+		assertTrue(myRobot.hasStopped());
+	}
+
+	@Test
+	public void testDistanceToObstacle() {
+		try {
+			setUp();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			myRobot.move(2);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.move(2);
+			myRobot.rotate(Turn.LEFT);
+			myRobot.move(1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//forward dist = 0, left dist = 1; idk what left and right are yet
+		int f1 = myRobot.distanceToObstacle(Direction.FORWARD);
+		if(f1 != 0){
+			fail("didn't measure forward distance correctly");
+		}
+		int l1 = myRobot.distanceToObstacle(Direction.LEFT);
+		if(l1 != 1){
+			fail("didn't measure left distance correctly");
+		}
+		int b1 = myRobot.distanceToObstacle(Direction.BACKWARD);
+		if(b1 != 2){
+			fail("didn't measure backward distance correctly");
+		}
+		int r1 = myRobot.distanceToObstacle(Direction.RIGHT);
+		if(r1 != 4){
+			fail("didn't measure right distance correctly");
+		}
+		
+		//Now we rotate and check other directions to make sure they all work correctly
+		try {
+			myRobot.rotate(Turn.RIGHT);
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		//forward dist = 4, left dist = 0; backwards = 1; right = 2
+		int f2 = myRobot.distanceToObstacle(Direction.FORWARD);
+		if(f2 != 4){
+			fail("didn't measure forward distance correctly");
+		}
+		int l2 = myRobot.distanceToObstacle(Direction.LEFT);
+		if(l2 != 0){
+			fail("didn't measure left distance correctly");
+		}
+		int b2 = myRobot.distanceToObstacle(Direction.BACKWARD);
+		if(b2 != 1){
+			fail("didn't measure backward distance correctly");
+		}
+		int r2 = myRobot.distanceToObstacle(Direction.RIGHT);
+		if(r2 != 2){
+			fail("didn't measure right distance correctly");
+		}
+		
+		//next rotation
+		try {
+			myRobot.rotate(Turn.RIGHT);
+		} catch (Exception e) {
+				e.printStackTrace();
+		}
+		//forward dist = 4, left dist = 0; backwards = 1; right = 2
+		int f3 = myRobot.distanceToObstacle(Direction.FORWARD);
+		if(f3 != 2){
+			fail("didn't measure forward distance correctly");
+		}
+		int l3 = myRobot.distanceToObstacle(Direction.LEFT);
+		if(l3 != 4){
+			fail("didn't measure left distance correctly");
+		}
+		int b3 = myRobot.distanceToObstacle(Direction.BACKWARD);
+		if(b3 != 0){
+			fail("didn't measure backward distance correctly");
+		}
+		int r3 = myRobot.distanceToObstacle(Direction.RIGHT);
+		if(r3 != 1){
+			fail("didn't measure right distance correctly");
+		}
+		
+		//last rotation
+		try {
+			myRobot.rotate(Turn.RIGHT);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//forward dist = 4, left dist = 0; backwards = 1; right = 2
+		int f4 = myRobot.distanceToObstacle(Direction.FORWARD);
+		if(f4 != 1){
+			fail("didn't measure forward distance correctly");
+		}
+		int l4 = myRobot.distanceToObstacle(Direction.LEFT);
+		if(l4 != 2){
+			fail("didn't measure left distance correctly");
+		}
+		int b4 = myRobot.distanceToObstacle(Direction.BACKWARD);
+		if(b4 != 4){
+			fail("didn't measure backward distance correctly");
+		}
+		int r4 = myRobot.distanceToObstacle(Direction.RIGHT);
+		if(r4 != 0){
+			fail("didn't measure right distance correctly");
+		}
+				
+	}
+
+}

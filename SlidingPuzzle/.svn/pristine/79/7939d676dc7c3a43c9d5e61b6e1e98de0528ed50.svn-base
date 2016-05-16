@@ -1,0 +1,284 @@
+package edu.wm.cs.cs301.slidingpuzzle;
+
+import java.util.Arrays;
+
+import edu.wm.cs.cs301.slidingpuzzle.PuzzleState.Operation;
+
+public class SimplePuzzleState implements PuzzleState {
+	
+	private int[] state; // a field to store the values of the puzzle
+	private PuzzleState parent; // a field that will store the parent of a puzzle
+	private Operation prevOp; // a field to store the previous operation that was used
+	private int Dist; // a field to store the distance from the initial state
+	
+	// constructors. 
+	public SimplePuzzleState() {
+		state = null;
+		parent = null;
+		prevOp = null;
+		Dist = 0;
+	}
+
+	/**
+	 * Get the current puzzle state in a single dimensional array (i.e. {0,1,3,2} for 2x2 puzzle). 
+	 * Blank tile is represented as 0. The coding goes by rows, for the example the top row 
+	 * contains values 0 and 1 from left to right. This method is symmetric to setState and
+	 * returns an array of same content that was assigned with the setState method.
+	 * @return Single dimensional array of integer representing puzzle state
+	 */
+	public int[] getState() {
+		return state;
+	}
+
+	/**
+	 * Allows to configure the puzzle state to a particular game state. 
+	 * The state is provided as an array of integer.
+	 * For instance, an one dimensional integer array {0,1,3,2} represents a state of 2x2 puzzle
+	 * with the first row carrying values 0 and 1, the second row carrying values 3 and 2.
+	 * @param gameState provides a value for each tile in the current state of the game. 
+	 */
+	public void setState(int[] gameState) {
+		state = gameState;
+	}
+
+	/**
+	 * Get the parent state which was previously set with the setParentState method.
+	 * The parent state is useful if one wants to represent
+	 * that a puzzle state A moves to puzzle state B with a particular move operation.
+	 * For this example B.getParentState() returns A. Obtaining A is useful to extract
+	 * a path from a starting state to a final state once the final state is reached.
+	 * @return a previously stored parent state
+	 */
+	public PuzzleState getParent() {
+		return parent;
+	}
+
+	/**
+	 * Sets the parent state. 
+	 * For the intended use, see comment for corresponding getParentState method.
+	 * @param parentState
+	 */
+	public void setParent(PuzzleState anyParent) {
+		parent = anyParent;
+	}
+
+	/**
+	 * Retrieves the operation by which this state is reached. This just returns the
+	 * operation that was previously stored with setOperation.
+	 * @return previously stored Operation or null if there is none.
+	 */
+	public Operation getOperation() {
+		return prevOp;
+	}
+	
+	/**
+	 * Sets the operation by which this state is reached.
+	 * @param op
+	 */
+	public void setOperation(Operation op) {
+		prevOp = op;
+	}
+	
+	/**
+	 * Get distance from initial state.
+	 * The initial state has distance 0, states that are reached with one move have distance one and so forth.
+	 */
+	public int getDistance() {
+		return Dist;
+	}
+
+	/**
+	 * Set distance from initial state.
+	 * The initial state has distance 0, states that are reached with one move have distance one and so forth.
+	 */
+	public void setDistance(int dist) {
+		Dist = dist;
+	}
+
+	@Override
+	/**Compare other puzzle state to current puzzle state.
+	 * @param other puzzle state to compare
+	 * @returns true if equal and false otherwise
+	 * 
+	 */
+	public boolean equals(PuzzleState other) {
+		
+		// If lengths are not equal, the two grids cannot be the same
+		if (this.getState().length != other.getState().length){
+			return false;
+		}
+		
+		// Iterates over each element of this and other and checks if they are equal
+		int i =0;
+		for (i = 0; i < this.getState().length; i++) {
+			if( this.getState()[i] != other.getState()[i]){
+				return false;
+			}
+		}
+		return true;
+		
+	}
+
+	@Override
+	public PuzzleState moveUp() {
+	
+		PuzzleState s = this.createNew();
+		
+		int blank = s.getZeroNdx(s.getState()); //gets the zero index 1d view
+		int width = s.getWidth(); //gets the puzzle width - just the square root of the size
+		int row = s.getRowNdx(blank, width); //gets the row index of the zero 2d view
+		int col = s.getColNdx(blank, width); //gets the column index of the zero 2d view
+		
+		if( 0 < row && row <= width){
+			int ogNdx = col + (width*(row - 1)); //index of the value above the zero
+			int switchVal = s.getState()[ogNdx]; //Value of the space above the zero
+			s.getState()[ogNdx] = 0;
+			s.getState()[blank] = switchVal;
+			s.setDistance(s.getDistance() + 1);
+			
+			return s;		
+		}
+		
+		return null;
+			
+	}
+
+	@Override
+	public PuzzleState moveDown() {
+		
+		PuzzleState s = this.createNew();
+		
+		int blank = s.getZeroNdx(s.getState()); //gets the zero index 1d view
+		int width = s.getWidth(); //gets the puzzle width - just the square root of the size
+		int row = s.getRowNdx(blank, width); //gets the row index of the zero 2d view
+		int col = s.getColNdx(blank, width); //gets the column index of the zero 2d view
+		
+		if( 0 <= row && row < (width - 1) ){
+			int ogNdx = col + (width*(row + 1)); //index of the value below the zero
+			int switchVal = s.getState()[ogNdx]; //Value of the space below the zero
+			s.getState()[ogNdx] = 0;
+			s.getState()[blank] = switchVal;
+			s.setDistance(s.getDistance() + 1);
+			
+			return s;		
+		}
+		
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveLeft() {
+		
+		PuzzleState s = this.createNew();
+		
+		int blank = s.getZeroNdx(s.getState()); //gets the zero index 1d view
+		int width = s.getWidth(); //gets the puzzle width - just the square root of the size
+		int row = s.getRowNdx(blank, width); //gets the row index of the zero 2d view
+		int col = s.getColNdx(blank, width); //gets the column index of the zero 2d view
+		
+		if( 0 < col && col <= (width -1)){
+			int ogNdx = (col - 1) + (width*row); //index of the value to the left of the zero
+			int switchVal = s.getState()[ogNdx]; //Value of the space to the left of the zero
+			s.getState()[ogNdx] = 0;
+			s.getState()[blank] = switchVal;
+			s.setDistance(s.getDistance() + 1);
+			
+			return s;		
+		}
+		return null;
+	}
+
+	@Override
+	public PuzzleState moveRight() {
+		
+		PuzzleState s = this.createNew();
+		
+		int blank = s.getZeroNdx(s.getState()); //gets the zero index 1d view
+		int width = s.getWidth(); //gets the puzzle width - just the square root of the size
+		int row = s.getRowNdx(blank, width); //gets the row index of the zero 2d view
+		int col = s.getColNdx(blank, width); //gets the column index of the zero 2d view
+		
+		if( 0 <= col && col < (width - 1)){
+			int ogNdx = (col + 1) + (width*row); //index of the value to the right of the zero
+			int switchVal = s.getState()[ogNdx]; //Value of the space to the right of the zero
+			s.getState()[ogNdx] = 0;
+			s.getState()[blank] = switchVal;
+			s.setDistance(s.getDistance() + 1);
+			
+			return s;		
+		}
+		return null;
+	}
+	
+	/**Gets the index of the zero in the gameState array.
+	 * 
+	 * @param gameState
+	 * @return i The index of the zero
+	 */
+	public int getZeroNdx(int[] gameState) {
+		
+		int i =0;
+		for (i = 0; i < gameState.length; i++){
+			if (gameState[i] == 0){
+				break;
+			}
+		}
+		return i;
+	}
+	
+	/**gets the row index in 2d view
+	 * 
+	 * @param index the index from the 1d array in question
+	 * @return y the y-coordinate 
+	 */
+	public int getRowNdx(int index, int width) {
+		
+		int y = index/width;
+		
+		return y;		
+	}
+	
+	/**gets the col index in 2d view
+	 * 
+	 * @param index the index from the 1d array in question
+	 * @return x the x-coordinate 
+	 */
+	public int getColNdx(int index, int width) {
+		
+		int x = index % width;
+		
+		return x;		
+	}
+	
+	/** Gets what would be the width of a square grid.
+	 * Does so by taking the square root of the length of the array.
+	 * 
+	 * @return width of 2d array
+	 */
+	public int getWidth() {
+		
+		double l = this.getState().length;
+		int width = (int) Math.sqrt(l);
+		return width;
+		
+	}
+	
+	/**
+	 * a method that instantiates a new SimplePuzzleState instance with
+	 * its fields set to the calling objects fields
+	 * @return
+	 */
+	public PuzzleState createNew() {
+		
+		PuzzleState s = new SimplePuzzleState();
+		s.setParent(this); //Needs to be fixed
+		s.setDistance(this.getDistance()); 
+		s.setOperation(this.getOperation()); // Needs to be fixed
+		s.setState(this.getState());
+		
+		return s;
+		
+	}
+	
+
+}

@@ -1,0 +1,52 @@
+package falstad;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+
+public class GraphicsWrapper extends MazePanel {
+	
+	Graphics gc ;
+
+	public GraphicsWrapper() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public void setGraphics(){
+		
+		gc = getBufferGraphics();
+	}
+	
+	public void setColor(Color c){
+		gc.setColor(c);
+	}
+	
+	public void fillRect(int x, int y, int width, int height){
+		gc.fillRect(x, y, width, height);
+		
+	}
+	
+	public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints){
+		gc.fillPolygon(xPoints, yPoints, nPoints);
+	}
+
+	public void drawLine(int nx1, int ny1, int nx2, int ny12) {
+		gc.drawLine(nx1, ny1, nx2, ny12);
+		
+	}
+
+	public void fillOval(int i, int j, int cirsiz, int cirsiz2) {
+		gc.fillOval(i, j, cirsiz, cirsiz2);
+		
+	}
+
+	public FontMetrics getFontMetrics() {
+		return gc.getFontMetrics();
+	}
+
+	public void drawString(String str, int i, int ypos) {
+		gc.drawString(str, i, ypos);
+		
+	}
+
+}
